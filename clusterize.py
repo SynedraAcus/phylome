@@ -76,6 +76,8 @@ if __name__ == '__main__':
                         help='Clustering distance cutoff. Default 0.3')
     parser.add_argument('-m', type=str, default='ffp',
                         help='Distance metric. Accepts one of `ffp`, `euclidean`. Default `ffp`.')
+    parser.add_argument('-k', type=int, default=6,
+                        help='kmer length. Default 6')
     args = parser.parse_args()
 
     clustering_methods = {'ffp': ffp_distance,
@@ -92,7 +94,7 @@ if __name__ == '__main__':
     sys.stderr.flush()
     for fasta_file in args.f:
         for record in SeqIO.parse(fasta_file, format='fasta'):
-            element = Element(record)
+            element = Element(record, k=args.k,)
             accepted = False
             for cluster in clusters:
                 if cluster.should_accept(element):
@@ -105,4 +107,3 @@ if __name__ == '__main__':
     print('Built {0} clusters:'.format(len(clusters)))
     for cluster in clusters:
         print(', '.join((x.id for x in cluster)))
-
