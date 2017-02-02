@@ -61,6 +61,14 @@ class Cluster(collections.abc.MutableSet):
     def discard(self, value):
         self.sequences.discard(value)
 
+
+def kmer_overlap(a, b):
+    """Calculate percentage of kmers present in both elements"""
+    kmers_a = set(a.keys())
+    kmers_b = set(b.keys())
+    return len(kmers_a.intersection(kmers_b))/len(kmers_a.union(kmers_b))
+
+
 if __name__ == '__main__':
     parser = ArgumentParser(description='A fast k-mer based clusterization tool')
     parser.add_argument('-f', type=str, nargs='*', help='FASTA file(s)')
@@ -71,12 +79,15 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     clustering_methods = {'ffp': ffp_distance,
-                          'euclidean': euclidean}
+                          'euclidean': euclidean,
+                          'overlap': kmer_overlap}
+
     clustering_method_names = {'ffp': 'FFP method (Jensen-Shannon divergence)',
-                               'euclidean': 'Euclidean distance'}
+                               'euclidean': 'Euclidean distance',
+                               'overlap': 'percentage of shared kmers'}
     clusters = []
     #  Basic output
-    sys.stderr.write('Processing {0} with {1}'.format(','.join(args.f),
+    sys.stderr.write('Processing {0} with {1}\n'.format(','.join(args.f),
                                               clustering_method_names[args.m]))
     sys.stderr.flush()
     for fasta_file in args.f:
