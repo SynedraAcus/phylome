@@ -20,7 +20,7 @@ args = parser.parse_args()
 
 with NamedTemporaryFile(mode='w+') as output_handle:
     for fasta_file in args.f:
-        record_count=0
+        record_count = 0
         accepted_record_count = 0
         for record in SeqIO.parse(fasta_file, format='fasta'):
             record_count += 1
@@ -35,7 +35,7 @@ with NamedTemporaryFile(mode='w+') as output_handle:
                 int(100*accepted_record_count/record_count)
             ))
         if args.i:
-            raise NotImplementedError
+            shutil.copy(output_handle.name, fasta_file)
         else:
             dest = '{}.filtered'.format(fasta_file)
             shutil.copy(output_handle.name, dest)
