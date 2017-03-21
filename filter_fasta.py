@@ -30,9 +30,9 @@ with NamedTemporaryFile(mode='w+') as output_handle:
                     accepted_record_count += 1
                     SeqIO.write(record, handle=output_handle, format='fasta')
         if args.v:
-            sys.stderr.write('Accepted {0} out of {1} records ({2}%)\n'.format(
+            sys.stderr.write('Accepted {0} out of {1} records ({2}%) from {3}\n'.format(
                 accepted_record_count, record_count,
-                int(100*accepted_record_count/record_count)
+                int(100*accepted_record_count/record_count), fasta_file
             ))
         if args.i:
             shutil.copy(output_handle.name, fasta_file)
