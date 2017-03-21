@@ -1,5 +1,15 @@
 #! /usr/bin/env python3
 
+
+################################################################################
+#                            NOTE TO SELF                                      #
+# This clustering script is not gonna be utilized. Self-written k-mer-based    #
+# clustering is outperformed by CD-hit in terms of both speed and precision, so#
+# I'm gonna use that for an actual work. The script is kept purely because     #
+# sometime one or another piece of it may become handy.                        #
+#                                                                              #
+################################################################################
+
 import sys
 import collections.abc
 from argparse import ArgumentParser
