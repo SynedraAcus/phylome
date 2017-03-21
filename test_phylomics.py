@@ -4,6 +4,7 @@
 import pytest
 from phylomics import BlastHit, parse_blast_line, parse_blast_file
 
+
 def test_valid_blast_lines():
     # Parsing valid line
     assert parse_blast_line('Achnanthes_exigua_ABQ43357.1	NODE_3018_length_2386_cov_4738.01	76.37	182	43	0	1	182	411	956	5e-88	 277') ==\
@@ -30,6 +31,11 @@ def test_invalid_blast_lines():
         parse_blast_line('0\t1	2	76.37	182	43	0	1	182	411	956	5e-88	 277')
     with pytest.raises(ValueError):
         parse_blast_line('')
+    with pytest.raises(ValueError):
+        parse_blast_line('Foo bar baz')
+
+# Calling list() everywhere because generator is not evaluated until someone
+# actually needs a value
 
 
 def test_valid_blast_file():
@@ -44,15 +50,15 @@ def test_valid_blast_file():
 
 def test_invalid_blast_file():
     with pytest.raises(TypeError):
-        g = parse_blast_file(42)
+        g = list(parse_blast_file(42))
     with pytest.raises(TypeError):
-        g = parse_blast_file([1, 2, 'qwerty'])
+        g = list(parse_blast_file([1, 2, 'qwerty']))
     # File doesn't exist:
     with pytest.raises(FileNotFoundError):
-        g = parse_blast_file('asdf')
+        g = list(parse_blast_file('asdf'))
     # A file exists, but isn't BLAST
     with pytest.raises(ValueError):
-        g = parse_blast_file('README.md')
+        g = list(parse_blast_file('README.md'))
     # Same for handle
     with pytest.raises(ValueError):
-        g = parse_blast_file(open('README.md', mode='r'))
+        g = list(parse_blast_file(open('README.md', mode='r')))

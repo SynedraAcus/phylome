@@ -32,7 +32,7 @@ def parse_blast_line(line):
                     evalue=float(arr[10]))
 
 
-def parse_blast_file(file):
+def parse_blast_file(filename):
     """
     Take a BLAST output file and generate BlastHit instances from its lines.
     It assumes the default tabular output from BLAST 2.2.28+ (generated with
@@ -40,13 +40,13 @@ def parse_blast_file(file):
     Any line starting with `#` is considered a comment and omitted.
     `file` can be either a filehandle in text mode or a filename. In latter case
     it would be opened in `'r'` mode.
-    :param file: str or filehandle
+    :param filename: str or filehandle
     :return:
     """
-    if isinstance(file, str):
-        handle = open(file, mode='r')
-    elif isinstance(file, TextIOBase) and file.readable():
-        handle = file
+    if isinstance(filename, str):
+        handle = open(filename, mode='r')
+    elif isinstance(filename, TextIOBase) and filename.readable():
+        handle = filename
     else:
         raise TypeError('Only string or readable text-mode filehandle accepted by parse_blast_file')
     for line in handle:
