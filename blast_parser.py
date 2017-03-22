@@ -1,5 +1,3 @@
-#! /usr/bin/env python3
-
 """
 A lightweight BLAST tabular output parser.
 It slightly outperforms Biopython's BLAST parser, but is mostly here as an
