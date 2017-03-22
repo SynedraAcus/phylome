@@ -1,11 +1,15 @@
 #! /usr/bin/env python3
 
-"""A collection of functions and methods for phylomic analysis"""
+"""
+A lightweight BLAST tabular output parser.
+It slightly outperforms Biopython's BLAST parser, but is mostly here as an
+exercise in a more functional programming style and proper unittests.
+"""
 
 from collections import namedtuple
 from io import TextIOBase
 
-# Lightweight BLAST table parser
+
 BlastHSP = namedtuple('BlastHSP', ['query_id', 'hit_id', 'query_pos', 'hit_pos',
                                    'evalue'])
 BlastHit = namedtuple('BlastHit', ['query_id', 'hit_id', 'hsps'])

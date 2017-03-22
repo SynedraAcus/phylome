@@ -1,8 +1,8 @@
 #! /usr/bin/env python3
 
-#  Unit tests for phylomics.py
+#  Unit tests for blast_parser.py
 import pytest
-from phylomics import BlastHSP, parse_blast_line, parse_blast_file_to_hsps, \
+from blast_parser import BlastHSP, parse_blast_line, parse_blast_file_to_hsps, \
     assemble_hits, BlastHit, parse_blast_file_to_hits
 
 
