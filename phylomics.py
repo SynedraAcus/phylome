@@ -33,34 +33,12 @@ def parse_blast_line(line):
                     evalue=float(arr[10]))
 
 
-def parse_blast_file_to_hsps(filename):
-    """
-    Take a BLAST output file and generate BlastHSP instances from its lines.
-    It assumes the default tabular output from BLAST 2.2.28+ (generated with
-    `outfmt 6` or `outfmt 7` without any additional format specifications).
-    Any line starting with `#` is considered a comment and omitted.
-    `file` can be either a filehandle in text mode or a filename. In latter case
-    it would be opened in `'r'` mode.
-    :param filename: str or filehandle
-    :return:
-    """
-    if isinstance(filename, str):
-        handle = open(filename, mode='r')
-    elif isinstance(filename, TextIOBase) and filename.readable():
-        handle = filename
-    else:
-        raise TypeError('Only string or readable text-mode filehandle accepted by parse_blast_file')
-    for line in handle:
-        if not line[0] == '#':
-            yield parse_blast_line(line)
-    # Not closing a filehandle because it can be used by the calling code.
-
-
-#  Assemble hits
 def assemble_hits(iterable):
     """
     Groups HSPs into BlastHit instances
-    Takes an iterable of BlastHSPs, yields BlastHits
+    Takes an iterable of BlastHSPs, yields BlastHits. Assumes the iterable to be
+    sorted by query ID and, for each query, to be sorted by hit ID (*vice versa
+    should also work).
     :param iterable:
     :return:
     """
@@ -79,3 +57,51 @@ def assemble_hits(iterable):
             y = []
             current_hit = blast_hsp.hit_id
             current_query = blast_hsp.query_id
+
+
+def create_handle(filename):
+    """
+    Take a readable filehandle or an str, return readable filehandle.
+    If it's a filehandle already, this is an identity function, otherwise the
+    string is treated as a filename to be open. Any other argument type raises
+    TypeError.
+    :param filename:
+    :return:
+    """
+    if isinstance(filename, str):
+        return open(filename, mode='r')
+    elif isinstance(filename, TextIOBase) and filename.readable():
+        return filename
+    else:
+        raise TypeError('Only string or readable text-mode filehandle accepted by parse_blast_file')
+
+
+def parse_blast_file_to_hsps(filename):
+    """
+    Take a BLAST output file and generate BlastHSP instances from its lines.
+    It assumes the default tabular output from BLAST 2.2.28+ (generated with
+    `outfmt 6` or `outfmt 7` without any additional format specifications).
+    Any line starting with `#` is considered a comment and omitted.
+    `file` can be either a filehandle in text mode or a filename. In latter case
+    it would be opened in `'r'` mode.
+    :param filename: str or filehandle
+    :return:
+    """
+    for line in create_handle(filename):
+        if not line[0] == '#':
+            yield parse_blast_line(line)
+    # Not closing a filehandle because it can be used by the calling code.
+
+
+def parse_blast_file_to_hits(filename):
+    """
+    Take a BLAST output file and generate BlastHit instances from its lines.
+    It assumes the default tabular output from BLAST 2.2.28+ (generated with
+    `outfmt 6` or `outfmt 7` without any additional format specifications).
+    Any line starting with `#` is considered a comment and omitted.
+    `file` can be either a filehandle in text mode or a filename. In latter case
+    it would be opened in `'r'` mode.
+    :param filename: str or filehandle
+    :return: generator
+    """
+    return assemble_hits(parse_blast_file_to_hsps(filename))
