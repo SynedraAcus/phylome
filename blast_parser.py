@@ -53,13 +53,19 @@ def assemble_hits(iterable):
             current_hit = blast_hsp.hit_id
         if not current_query:
             current_query = blast_hsp.query_id
-        y.append(blast_hsp)
-        if current_hit != blast_hsp.hit_id or current_query != blast_hsp.query_id:
+        if current_hit == blast_hsp.hit_id and current_query == blast_hsp.query_id:
+            y.append(blast_hsp)
+        else:
             yield BlastHit(query_id=current_query, hit_id=current_hit, hsps=y)
-            y = []
             current_hit = blast_hsp.hit_id
             current_query = blast_hsp.query_id
-        yield BlastHit(query_id=current_query, hit_id=current_hit, hsps=y)
+            y = [blast_hsp]
+        # if current_hit != blast_hsp.hit_id or current_query != blast_hsp.query_id:
+        #     yield BlastHit(query_id=current_query, hit_id=current_hit, hsps=y)
+        #     y = []
+        #     current_hit = blast_hsp.hit_id
+        #     current_query = blast_hsp.query_id
+    yield BlastHit(query_id=current_query, hit_id=current_hit, hsps=y)
 
 
 def create_handle(filename):

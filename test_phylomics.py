@@ -99,28 +99,28 @@ def test_assemble_hits():
     hits = list(assemble_hits(parse_blast_file_to_hsps('test_data/BLAST_test.tsv')))
     assert len(hits) == 46
     assert all(isinstance(x, BlastHit) for x in hits)
-    assert len([x for x in hits if len(x.hsps) == 2]) == 5
+    assert len([x for x in hits if len(x.hsps) == 2]) == 4
     assert len([x for x in hits if len(x.hsps) > 2 or len(x.hsps) < 1]) == 0
-
-
+#
+#
 def test_duplicates():
     # query1 is duplicate, query2 isn't, single_hsp is guess what
     duplicate_hit, non_duplicate_hit, single_hsp = assemble_hits(
-        (BlastHSP(query_id='query1', hit_id='hit',
+        [BlastHSP(query_id='query1', hit_id='hit',
                   evalue=0.0001, query_pos=(1, 100),
                   hit_pos=(1, 100)),
-        BlastHSP(query_id='query1', hit_id='hit',
-                 evalue=0.0001, query_pos=(150, 250),
-                 hit_pos=(5, 95)),
-        BlastHSP(query_id='query2', hit_id='hit',
-                 evalue=0.0001, query_pos=(1, 100),
-                 hit_pos=(1, 100)),
-        BlastHSP(query_id='query2', hit_id='hit',
-                 evalue=0.001, query_pos=(120, 170),
-                 hit_pos=(110, 180)),
-        BlastHSP(query_id='query3', hit_id='hit',
-                 evalue=0.0001, query_pos=(1, 100),
-                 hit_pos=(1, 100))))
+         BlastHSP(query_id='query1', hit_id='hit',
+                  evalue=0.0001, query_pos=(150, 250),
+                  hit_pos=(5, 95)),
+         BlastHSP(query_id='query2', hit_id='hit',
+                  evalue=0.0001, query_pos=(1, 100),
+                  hit_pos=(1, 100)),
+         BlastHSP(query_id='query2', hit_id='hit',
+                  evalue=0.001, query_pos=(120, 170),
+                  hit_pos=(110, 180)),
+         BlastHSP(query_id='query3', hit_id='hit',
+                  evalue=0.0001, query_pos=(1, 100),
+                  hit_pos=(1, 100))])
     assert not is_duplicate(single_hsp)
     assert is_duplicate(duplicate_hit)
     assert not is_duplicate(non_duplicate_hit)
