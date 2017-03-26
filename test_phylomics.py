@@ -133,13 +133,15 @@ def test_duplicates():
 def test_taxa_descent():
     #  All mySQL tests are kept in a single function to avoid lengthy creation
     #  of a connection for every test I need to run.
-    connection = mysql.connector.connect(host='locathost', user='user',
+    connection = mysql.connector.connect(host='localhost', user='root',
                                          password='password', database='biosql')
     cursor = connection.cursor()
-    #  ValueError on the invalid taxon_id
-    with pytest.raises(ValueError):
-        descend_taxon_tree(10000000, cursor)
-        descend_taxon_tree(0, cursor)
     #  An ancestor chain for a valid taxon, in this case genus synedra
     assert list(descend_taxon_tree(156135, cursor)) == [
         16060, 16059, 16058, 16057, 2231, 15888, 2166, 101881]
+    #  ValueError on the invalid taxon_id
+    with pytest.raises(ValueError):
+        list(descend_taxon_tree(10000000, cursor))
+        list(descend_taxon_tree(0, cursor))
+    with pytest.raises(TypeError):
+        list(descend_taxon_tree('foo', cursor))

@@ -3,8 +3,8 @@ A bunch of functions for making and checking taxonomy statements.
 
 All functions in this file rely on NCBI taxonomy database being available via
 mySQL and require a mysql.connector.cursor as one of the arguments. All these
-things can probably be written better using pure SQL, but I don't know SQL and
-I kinda need these things right now.
+things can probably be written trivially using pure SQL, but I don't know SQL
+and I kinda need them right now.
 """
 
 
@@ -18,7 +18,19 @@ def descend_taxon_tree(starting_taxon, cursor):
     :param cursor:
     :return:
     """
-    pass
+    if not isinstance(starting_taxon, int):
+        raise TypeError('Taxon ID should be int')
+    query = starting_taxon
+    while True:
+        cursor.execute('SELECT `parent_taxon_id` FROM taxon WHERE `taxon_id`={0};'.format(query))
+        mysql_answer = cursor.fetchall()
+        if not mysql_answer:
+            raise ValueError('Invalid taxon ID')
+        query = mysql_answer[0][0]
+        if query == 1:
+            return
+        else:
+            yield query
 
     
 def get_taxa_list(taxon_id, cursor):
