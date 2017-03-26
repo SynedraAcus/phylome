@@ -37,10 +37,15 @@ def overlap_len(range1, range2):
     return min(range1[1], range2[1]) - max(range1[0], range2[0])
 
 
-def is_duplicate(hit, overlap_cutoff, len_cutoff):
+def is_duplicate(hit, overlap_cutoff=0.5, len_cutoff=50):
     """
     Return True if this hit covers several regions of query sequence with the
     same region of hit sequence.
+    Accepts two optional parameters:
+    `len_cutoff` is a minimum length (on hit) an HSP must have to be considered
+    meaningful. Defaults to 50.
+    `overlap_cutoff` is a minimum percentage of both hsps that should be in the
+    overlap for it to be considered meaningful. Defaults to 0.5
     :param hit: BlastHit
     :param overlap_cutoff: int
     :param len_cutoff: int

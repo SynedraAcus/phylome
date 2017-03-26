@@ -4,6 +4,7 @@
 import pytest
 from blast_parser import BlastHSP, parse_blast_line, parse_blast_file_to_hsps, \
     assemble_hits, BlastHit, parse_blast_file_to_hits
+from multiplicates import is_duplicate
 
 
 def test_valid_blast_lines():
@@ -71,10 +72,10 @@ def test_valid_blast_file_to_hits():
     #  Check that the generator returns 45 BlastHit`s without raising anything
     # A filename passed as a string
     l = list(parse_blast_file_to_hits('test_data/BLAST_test.tsv'))
-    assert len(l) == 45 and all(isinstance(x, BlastHit) for x in l)
+    assert len(l) == 46 and all(isinstance(x, BlastHit) for x in l)
     # A filename passed as a filehandle
     l = list(parse_blast_file_to_hits(open('test_data/BLAST_test.tsv')))
-    assert len(l) == 45 and all(isinstance(x, BlastHit) for x in l)
+    assert len(l) == 46 and all(isinstance(x, BlastHit) for x in l)
 
 
 def test_invalid_blast_file_to_hits():
@@ -94,10 +95,32 @@ def test_invalid_blast_file_to_hits():
 
 
 def test_assemble_hits():
-    # This file contains 45 hits, only 5 out of which have 2 hsps and the rest 1
+    # This file contains 46 hits, only 5 out of which have 2 hsps and the rest 1
     hits = list(assemble_hits(parse_blast_file_to_hsps('test_data/BLAST_test.tsv')))
-    assert len(hits) == 45
+    assert len(hits) == 46
     assert all(isinstance(x, BlastHit) for x in hits)
     assert len([x for x in hits if len(x.hsps) == 2]) == 5
     assert len([x for x in hits if len(x.hsps) > 2 or len(x.hsps) < 1]) == 0
 
+
+def test_duplicates():
+    # query1 is duplicate, query2 isn't, single_hsp is guess what
+    duplicate_hit, non_duplicate_hit, single_hsp = assemble_hits(
+        (BlastHSP(query_id='query1', hit_id='hit',
+                  evalue=0.0001, query_pos=(1, 100),
+                  hit_pos=(1, 100)),
+        BlastHSP(query_id='query1', hit_id='hit',
+                 evalue=0.0001, query_pos=(150, 250),
+                 hit_pos=(5, 95)),
+        BlastHSP(query_id='query2', hit_id='hit',
+                 evalue=0.0001, query_pos=(1, 100),
+                 hit_pos=(1, 100)),
+        BlastHSP(query_id='query2', hit_id='hit',
+                 evalue=0.001, query_pos=(120, 170),
+                 hit_pos=(110, 180)),
+        BlastHSP(query_id='query3', hit_id='hit',
+                 evalue=0.0001, query_pos=(1, 100),
+                 hit_pos=(1, 100))))
+    assert not is_duplicate(single_hsp)
+    assert is_duplicate(duplicate_hit)
+    assert not is_duplicate(non_duplicate_hit)
