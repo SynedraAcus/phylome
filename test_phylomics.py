@@ -134,6 +134,8 @@ def test_duplicates():
 def test_taxa_descent():
     #  All mySQL tests are kept in a single function to avoid lengthy creation
     #  of a connection for every test I need to run.
+    #  This test will only run if you have bioSQL mySQL DB running with default
+    #  username and password. You probably shouldn't.
     connection = mysql.connector.connect(host='localhost', user='root',
                                          password='password', database='biosql')
     cursor = connection.cursor()
