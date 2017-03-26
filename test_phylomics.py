@@ -1,10 +1,14 @@
 #! /usr/bin/env python3
 
-#  Unit tests for blast_parser.py
+# Not my code, but needed for tests
 import pytest
+import mysql.connector
+
+# Stuff to be tested
 from blast_parser import BlastHSP, parse_blast_line, parse_blast_file_to_hsps, \
     assemble_hits, BlastHit, parse_blast_file_to_hits
 from multiplicates import is_duplicate
+from taxonomy import descend_taxon_tree
 
 
 def test_valid_blast_lines():
@@ -67,7 +71,6 @@ def test_invalid_blast_file_to_hsps():
 
 #  Similar to previous two
 
-
 def test_valid_blast_file_to_hits():
     #  Check that the generator returns 45 BlastHit`s without raising anything
     # A filename passed as a string
@@ -101,9 +104,10 @@ def test_assemble_hits():
     assert all(isinstance(x, BlastHit) for x in hits)
     assert len([x for x in hits if len(x.hsps) == 2]) == 4
     assert len([x for x in hits if len(x.hsps) > 2 or len(x.hsps) < 1]) == 0
-#
-#
+
+
 def test_duplicates():
+    # Test the duplicate-detection methods.
     # query1 is duplicate, query2 isn't, single_hsp is guess what
     duplicate_hit, non_duplicate_hit, single_hsp = assemble_hits(
         [BlastHSP(query_id='query1', hit_id='hit',
@@ -124,3 +128,18 @@ def test_duplicates():
     assert not is_duplicate(single_hsp)
     assert is_duplicate(duplicate_hit)
     assert not is_duplicate(non_duplicate_hit)
+
+
+def test_taxa_descent():
+    #  All mySQL tests are kept in a single function to avoid lengthy creation
+    #  of a connection for every test I need to run.
+    connection = mysql.connector.connect(host='locathost', user='user',
+                                         password='password', database='biosql')
+    cursor = connection.cursor()
+    #  ValueError on the invalid taxon_id
+    with pytest.raises(ValueError):
+        descend_taxon_tree(10000000, cursor)
+        descend_taxon_tree(0, cursor)
+    #  An ancestor chain for a valid taxon, in this case genus synedra
+    assert list(descend_taxon_tree(156135, cursor)) == [
+        16060, 16059, 16058, 16057, 2231, 15888, 2166, 101881]

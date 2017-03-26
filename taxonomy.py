@@ -1,5 +1,5 @@
 """
-A bunch of functions for making a checking taxonomy statements.
+A bunch of functions for making and checking taxonomy statements.
 
 All functions in this file rely on NCBI taxonomy database being available via
 mySQL and require a mysql.connector.cursor as one of the arguments. All these
@@ -12,6 +12,8 @@ def descend_taxon_tree(starting_taxon, cursor):
     """
     A generator that takes a starting taxon and yields its ancestors until it
     hits the root.
+    Returns neither query taxon nor root. Raises ValueError if supplied an
+    invalid taxon ID.
     :param starting_taxon:
     :param cursor:
     :return:
