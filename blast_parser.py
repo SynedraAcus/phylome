@@ -59,7 +59,7 @@ def assemble_hits(iterable):
             y = []
             current_hit = blast_hsp.hit_id
             current_query = blast_hsp.query_id
-    yield BlastHit(query_id=current_query, hit_id=current_hit, hsps=y)
+        yield BlastHit(query_id=current_query, hit_id=current_hit, hsps=y)
 
 
 def create_handle(filename):

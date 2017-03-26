@@ -13,7 +13,7 @@ shorter form is always assumed to be in a hit, and the longer in a query.
 """
 
 from blast_parser import BlastHit
-
+from itertools import combinations
 
 def overlap(range1, range2):
     """
@@ -54,15 +54,13 @@ def is_duplicate(hit, overlap_cutoff=0.5, len_cutoff=50):
     if len(hit.hsps) < 2:
         #  Obviously there is no point in working with one-HSP hits
         return False
-    for hsp1 in hit.hsps:
-        if hsp1.hit_range[1]-hsp1.hit_range[0] < len_cutoff:
-            continue
-        for hsp2 in hit:
-            if hsp2.hit_range[1]-hsp2.hit_range[0] < len_cutoff:
-                continue
-            #  Hit is considered duplicate if there is a pair of HSPs that overlap on hit, but not on query
-            if overlap(hsp1.hit_range, hsp2.hit_range) and not overlap(hsp1.query_range, hsp2.query_range):
-                l = overlap_len(hsp1.hit_range, hsp2.hit_range)
-                if l >= hsp1.hit_span*overlap_cutoff and l >= hsp2.hit_span*overlap_cutoff:
-                    return True
+    valid_hsps = filter(lambda x: abs(x.hit_pos[1]-x.hit_pos[0]) > len_cutoff,
+                        hit.hsps)
+    for h1, h2 in combinations(valid_hsps, 2):
+        if overlap(h1.hit_pos, h2.hit_pos) and \
+                not overlap(h1.query_pos, h2.query_pos):
+            l = overlap_len(h1.hit_pos, h2.hit_pos)
+            if l >= abs(h1.hit_pos[1]-h1.hit_pos[0]) * overlap_cutoff and \
+                    l >= abs(h2.hit_pos[1]-h2.hit_pos[0]) * overlap_cutoff:
+                return True
     return False
