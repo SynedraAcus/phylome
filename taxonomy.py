@@ -42,6 +42,8 @@ def get_taxa_list(taxon_id, cursor):
     :param cursor:
     :return:
     """
+    #  Frankly, I'd like an excuse to cast it to list a third time in the same line
+    return list(list(descend_taxon_tree(taxon_id, cursor)).__reversed__())
 
 
 def is_taxon_member(taxon1, taxon2, cursor):
@@ -51,7 +53,10 @@ def is_taxon_member(taxon1, taxon2, cursor):
     :param cursor:
     :return:
     """
-    pass
+    for taxon in descend_taxon_tree(taxon1, cursor):
+        if taxon == taxon2:
+            return True
+    return False
     
 
 def get_supertaxon_from_list(taxon, taxa_list, cursor):
@@ -68,4 +73,7 @@ def get_supertaxon_from_list(taxon, taxa_list, cursor):
     :param cursor:
     :return:
     """
-    pass
+    for supertaxon in descend_taxon_tree(taxon, cursor):
+        if supertaxon in taxa_list:
+            return supertaxon
+    raise ValueError('Neither taxon is a supertaxon of a query')

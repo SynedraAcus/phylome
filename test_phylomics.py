@@ -8,7 +8,8 @@ import mysql.connector
 from blast_parser import BlastHSP, parse_blast_line, parse_blast_file_to_hsps, \
     assemble_hits, BlastHit, parse_blast_file_to_hits
 from multiplicates import is_duplicate
-from taxonomy import descend_taxon_tree
+from taxonomy import descend_taxon_tree, get_taxa_list, is_taxon_member,\
+    get_supertaxon_from_list
 
 
 def test_valid_blast_lines():
@@ -145,3 +146,16 @@ def test_taxa_descent():
         list(descend_taxon_tree(0, cursor))
     with pytest.raises(TypeError):
         list(descend_taxon_tree('foo', cursor))
+    #  The same in reverse, and as list, not generator
+    assert get_taxa_list(156135, cursor) == [
+        101881, 2166, 15888, 2231, 16057, 16058, 16059, 16060]
+    #  Correct ancestor
+    assert is_taxon_member(156135, 2231, cursor)
+    #  Diatoms are definitely not bacteria
+    assert not is_taxon_member(156135, 2, cursor)
+    #  Again, are they bacteria, archaea or eukaryotes?
+    assert get_supertaxon_from_list(156135, [2, 1703, 2166], cursor) == 2166
+    #  Are diatoms mammals or birds?
+    with pytest.raises(ValueError):
+        get_supertaxon_from_list(156135, [21819, 7090], cursor)
+    
