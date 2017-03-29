@@ -140,8 +140,10 @@ def test_taxa_descent():
                                          password='password', database='biosql')
     cursor = connection.cursor()
     #  An ancestor chain for a valid taxon, in this case genus synedra
-    assert list(descend_taxon_tree(156135, cursor)) == [
-        16060, 16059, 16058, 16057, 2231, 15888, 2166, 101881]
+    # assert list(descend_taxon_tree(156135, cursor)) == [
+    #     16060, 16059, 16058, 16057, 2231, 15888, 2166, 101881]
+    assert list(descend_taxon_tree(191584, cursor)) == [
+        33856, 33855, 33854, 33853, 2836, 33634, 2759, 131567]
     #  ValueError on the invalid taxon_id
     with pytest.raises(ValueError):
         list(descend_taxon_tree(10000000, cursor))
@@ -149,15 +151,15 @@ def test_taxa_descent():
     with pytest.raises(TypeError):
         list(descend_taxon_tree('foo', cursor))
     #  The same in reverse, and as list, not generator
-    assert get_taxa_list(156135, cursor) == [
-        101881, 2166, 15888, 2231, 16057, 16058, 16059, 16060]
+    assert get_taxa_list(191584, cursor) == [
+        131567, 2759, 33634, 2836, 33853, 33854, 33855, 33856]
     #  Correct ancestor
-    assert is_taxon_member(156135, 2231, cursor)
+    assert is_taxon_member(191584, 2836, cursor)
     #  Diatoms are definitely not bacteria
-    assert not is_taxon_member(156135, 2, cursor)
+    assert not is_taxon_member(191584, 2, cursor)
     #  Again, are they bacteria, archaea or eukaryotes?
-    assert get_supertaxon_from_list(156135, [2, 1703, 2166], cursor) == 2166
+    assert get_supertaxon_from_list(191584, [2, 2157, 2759], cursor) == 2759
     #  Are diatoms mammals or birds?
     with pytest.raises(ValueError):
-        get_supertaxon_from_list(156135, [21819, 7090], cursor)
+        get_supertaxon_from_list(191584, [40674, 8782], cursor)
     

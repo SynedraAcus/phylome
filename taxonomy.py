@@ -20,17 +20,24 @@ def descend_taxon_tree(starting_taxon, cursor):
     """
     if not isinstance(starting_taxon, int):
         raise TypeError('Taxon ID should be int')
-    query = starting_taxon
+    cursor.execute('SELECT `taxon_id` FROM taxon WHERE `ncbi_taxon_id`={};'
+                   .format(starting_taxon))
+    mysql_answer = cursor.fetchall()
+    if not mysql_answer:
+        raise ValueError('Invalid NCBI taxon id')
+    mysql_id = mysql_answer[0][0]
     while True:
-        cursor.execute('SELECT `parent_taxon_id` FROM taxon WHERE `taxon_id`={0};'.format(query))
+        cursor.execute('SELECT `parent_taxon_id` FROM taxon WHERE `taxon_id`={0};'
+                       .format(mysql_id))
         mysql_answer = cursor.fetchall()
-        if not mysql_answer:
-            raise ValueError('Invalid taxon ID')
-        query = mysql_answer[0][0]
-        if query == 1:
+        mysql_id = mysql_answer[0][0]
+        if mysql_id == 1:
             return
         else:
-            yield query
+            cursor.execute('SELECT `ncbi_taxon_id` FROM taxon WHERE `taxon_id`={};'
+                           .format(mysql_id))
+            mysql_answer = cursor.fetchall()
+            yield mysql_answer[0][0]
 
     
 def get_taxa_list(taxon_id, cursor):
