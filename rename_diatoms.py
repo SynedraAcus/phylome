@@ -32,7 +32,7 @@ def mmetsp_name(old_name):
     for x in l:
         if 'ORGANISM' in x:
             l2 = old_name.split('\"')
-            name = l2[1] + '_' + name
+            name = l2[1] + '|' + name
     return name
 
 
@@ -43,7 +43,7 @@ def jgi_name(old_name):
     :return:
     """
     l = old_name.split('|')
-    return '_'.join((l[1], l[2]))
+    return '|'.join((l[1], l[2]))
     
 parser = ArgumentParser(description='Unified names for diatom sequences')
 parser.add_argument('-j', type=str, help='JGI FASTA')
@@ -56,4 +56,4 @@ if args.j:
 if args.m:
     rename_all(args.m, mmetsp_name)
 if args.s:
-    rename_all(args.s, renamer=lambda x: 'Synedra_Acus_'+x)
+    rename_all(args.s, renamer=lambda x: 'Synedra_Acus|'+x)
