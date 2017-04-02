@@ -13,6 +13,23 @@ BlastHSP = namedtuple('BlastHSP', ['query_id', 'hit_id', 'query_pos', 'hit_pos',
 BlastHit = namedtuple('BlastHit', ['query_id', 'hit_id', 'hsps'])
 
 
+def create_handle(filename):
+    """
+    Take a readable filehandle or an str, return readable filehandle.
+    If it's a filehandle already, this is an identity function, otherwise the
+    string is treated as a filename to be open. Any other argument type raises
+    TypeError.
+    :param filename:
+    :return:
+    """
+    if isinstance(filename, str):
+        return open(filename, mode='r')
+    elif isinstance(filename, TextIOBase) and filename.readable():
+        return filename
+    else:
+        raise TypeError('Only string or readable text-mode filehandle accepted by parse_blast_file')
+    
+    
 def parse_blast_line(line):
     """
     Take a single line from BLAST file and return a BlastHSP.
@@ -60,29 +77,7 @@ def assemble_hits(iterable):
             current_hit = blast_hsp.hit_id
             current_query = blast_hsp.query_id
             y = [blast_hsp]
-        # if current_hit != blast_hsp.hit_id or current_query != blast_hsp.query_id:
-        #     yield BlastHit(query_id=current_query, hit_id=current_hit, hsps=y)
-        #     y = []
-        #     current_hit = blast_hsp.hit_id
-        #     current_query = blast_hsp.query_id
     yield BlastHit(query_id=current_query, hit_id=current_hit, hsps=y)
-
-
-def create_handle(filename):
-    """
-    Take a readable filehandle or an str, return readable filehandle.
-    If it's a filehandle already, this is an identity function, otherwise the
-    string is treated as a filename to be open. Any other argument type raises
-    TypeError.
-    :param filename:
-    :return:
-    """
-    if isinstance(filename, str):
-        return open(filename, mode='r')
-    elif isinstance(filename, TextIOBase) and filename.readable():
-        return filename
-    else:
-        raise TypeError('Only string or readable text-mode filehandle accepted by parse_blast_file')
 
 
 def parse_blast_file_to_hsps(filename):
@@ -115,6 +110,7 @@ def parse_blast_file_to_hits(filename):
     """
     return assemble_hits(parse_blast_file_to_hsps(filename))
 
+
 def iterate_by_query(hits_iterator):
     """
     Yield lists of hits with the same query.
@@ -125,3 +121,16 @@ def iterate_by_query(hits_iterator):
     :param hits_iterator:
     :return:
     """
+    current_query = ''
+    #  Probably could be an iterator as well, but I can't design the algorithm.
+    hits = []
+    for BlastHit in hits_iterator:
+        if not current_query:
+            current_query = BlastHit.query_id
+        if BlastHit.query_id == current_query:
+            hits.append(BlastHit)
+        else:
+            yield hits
+            hits = [BlastHit]
+            current_query = BlastHit.query_id
+    yield hits

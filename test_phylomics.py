@@ -3,13 +3,14 @@
 # Not my code, but needed for tests
 import mysql.connector
 import pytest
+
 # Stuff to be tested
-from phylome.blast_parser import BlastHSP, parse_blast_line, parse_blast_file_to_hsps, \
-    assemble_hits, BlastHit, parse_blast_file_to_hits
+from phylome.blast_parser import BlastHSP, parse_blast_line, \
+    parse_blast_file_to_hsps, \
+    assemble_hits, BlastHit, parse_blast_file_to_hits, iterate_by_query
+from phylome.multiplicates import is_duplicate
 from phylome.taxonomy import descend_taxon_tree, get_taxa_list, is_taxon_member, \
     get_supertaxon_from_list
-
-from phylome.multiplicates import is_duplicate
 
 
 def test_valid_blast_lines():
@@ -105,6 +106,13 @@ def test_assemble_hits():
     assert all(isinstance(x, BlastHit) for x in hits)
     assert len([x for x in hits if len(x.hsps) == 2]) == 4
     assert len([x for x in hits if len(x.hsps) > 2 or len(x.hsps) < 1]) == 0
+    
+def test_iterate_by_query():
+    # The same file as in previous test. It contains 9 unique queries
+    l = list(iterate_by_query(parse_blast_file_to_hits('test_data/BLAST_test.tsv')))
+    assert len(l) == 9
+    # These queries (in order that they appear) have this many hits
+    assert [len(x) for x in l] == [5, 3, 5, 6, 6, 6, 6, 4, 5]
 
 
 def test_duplicates():
