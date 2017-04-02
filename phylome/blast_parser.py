@@ -114,3 +114,14 @@ def parse_blast_file_to_hits(filename):
     :return: generator
     """
     return assemble_hits(parse_blast_file_to_hsps(filename))
+
+def iterate_by_query(hits_iterator):
+    """
+    Yield lists of hits with the same query.
+    Given an iterator of BlastHit instances, this function produces lists of the
+    BlastHits with the same query. It assumes hits to be sorted by query, ie
+    that all the hits of a given query are following one after another in the
+    list (which is a normal behaviour for BLAST output)
+    :param hits_iterator:
+    :return:
+    """
