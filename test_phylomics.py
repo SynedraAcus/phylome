@@ -107,6 +107,7 @@ def test_assemble_hits():
     assert len([x for x in hits if len(x.hsps) == 2]) == 4
     assert len([x for x in hits if len(x.hsps) > 2 or len(x.hsps) < 1]) == 0
     
+
 def test_iterate_by_query():
     # The same file as in previous test. It contains 9 unique queries
     l = list(iterate_by_query(parse_blast_file_to_hits('test_data/BLAST_test.tsv')))
