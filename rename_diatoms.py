@@ -27,13 +27,13 @@ def mmetsp_name(old_name):
     :param old_name:
     :return:
     """
-    global mmetsp_regex
     l = old_name.split(' ')
     name = l[0]
     for x in l:
         if 'ORGANISM' in x:
             l2 = old_name.split('\"')
             name = l2[1] + '_' + name
+    return name
 
 
 def jgi_name(old_name):
@@ -42,16 +42,18 @@ def jgi_name(old_name):
     :param old_name:
     :return:
     """
+    l = old_name.split('|')
+    return '_'.join((l[1], l[2]))
     
 parser = ArgumentParser(description='Unified names for diatom sequences')
 parser.add_argument('-j', type=str, help='JGI FASTA')
 parser.add_argument('-m', type=str, help='MMETSP FASTA')
 parser.add_argument('-s', type=str, help='Synedra acus FASTA')
 args = parser.parse_args()
-mmetsp_regex = re.compile('/ORGANISM="(\w+)"')
+
 if args.j:
-    rename_all(args.j, jgi_name, args.i)
+    rename_all(args.j, jgi_name)
 if args.m:
-    rename_all(args.m, mmetsp_name, args.i)
+    rename_all(args.m, mmetsp_name)
 if args.s:
     rename_all(args.s, renamer=lambda x: 'Synedra_Acus_'+x)
