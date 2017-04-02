@@ -27,7 +27,13 @@ def mmetsp_name(old_name):
     :param old_name:
     :return:
     """
-    pass
+    global mmetsp_regex
+    l = old_name.split(' ')
+    name = l[0]
+    for x in l:
+        if 'ORGANISM' in x:
+            l2 = old_name.split('\"')
+            name = l2[1] + '_' + name
 
 
 def jgi_name(old_name):
@@ -42,7 +48,7 @@ parser.add_argument('-j', type=str, help='JGI FASTA')
 parser.add_argument('-m', type=str, help='MMETSP FASTA')
 parser.add_argument('-s', type=str, help='Synedra acus FASTA')
 args = parser.parse_args()
-
+mmetsp_regex = re.compile('/ORGANISM="(\w+)"')
 if args.j:
     rename_all(args.j, jgi_name, args.i)
 if args.m:
