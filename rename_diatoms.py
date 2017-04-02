@@ -1,30 +1,24 @@
 #! /usr/bin/env python3
 
-import shutil
 from argparse import ArgumentParser
-from tempfile import NamedTemporaryFile
 
 from Bio import SeqIO
 
 
-def rename_sequence(record, renamer=lambda x: x)
-    record.description = renamer(record.description)
-    record.id = ''
+def rename_sequence(record, renamer=lambda x: x):
+    # record.description = renamer(record.description)
+    record.id = renamer(record.description)
+    record.description = ''
     record.name = ''
     #  return for readability only
     return record
 
 
-def rename_all(file, renamer, in_place=False):
-    with NamedTemporaryFile(mode='w+t') as outfile:
-        for record in SeqIO.parse(file, format='fasta'):
-            record = rename_sequence(record)
-            SeqIO.write(record, outfile, 'fasta')
-        if in_place:
-            outname = file
-        else:
-            outname = '{}.renamed'.format(file)
-        shutil.copy(outfile.name, outname)
+def rename_all(file, renamer):
+    # Iterators are the best thing since sliced bread
+    SeqIO.write((rename_sequence(x, renamer) for x in SeqIO.parse(file, format='fasta')),
+                handle='{}.renamed'.format(file),
+                format='fasta')
         
         
 def mmetsp_name(old_name):
@@ -34,6 +28,7 @@ def mmetsp_name(old_name):
     :return:
     """
     pass
+
 
 def jgi_name(old_name):
     """
@@ -46,7 +41,6 @@ parser = ArgumentParser(description='Unified names for diatom sequences')
 parser.add_argument('-j', type=str, help='JGI FASTA')
 parser.add_argument('-m', type=str, help='MMETSP FASTA')
 parser.add_argument('-s', type=str, help='Synedra acus FASTA')
-parser.add_argument('-i', action='store_true', help='Rename in-place')
 args = parser.parse_args()
 
 if args.j:
@@ -54,4 +48,4 @@ if args.j:
 if args.m:
     rename_all(args.m, mmetsp_name, args.i)
 if args.s:
-    rename_all(args.s, lambda x: 'SynedraAcus_'+x, args.i)
+    rename_all(args.s, renamer=lambda x: 'Synedra_Acus_'+x)
