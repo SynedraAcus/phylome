@@ -1,10 +1,11 @@
 #! /usr/bin/env python3
 
-from argparse import ArgumentParser
-from Bio import SeqIO
-from tempfile import NamedTemporaryFile
 import shutil
 import sys
+from argparse import ArgumentParser
+from tempfile import NamedTemporaryFile
+
+from Bio import SeqIO
 
 parser = ArgumentParser(description='Filter aminoacid sequences in FASTA file by length and percentage of X\'es')
 parser.add_argument('-f', type=str, nargs='+', help='FASTA file(s)')
@@ -29,14 +30,18 @@ with NamedTemporaryFile(mode='w+') as output_handle:
                 if x_perc < args.x:
                     accepted_record_count += 1
                     SeqIO.write(record, handle=output_handle, format='fasta')
+            if args.v and record_count % 10000 == 0:
+                sys.stderr.write('Accepted {0} out of {1} records ({2}%) from {3}\n'.\
+                    format(accepted_record_count, record_count,
+                    int(100*accepted_record_count/record_count), fasta_file))
         if args.v:
             sys.stderr.write('Accepted {0} out of {1} records ({2}%) from {3}\n'.format(
                 accepted_record_count, record_count,
                 int(100*accepted_record_count/record_count), fasta_file
             ))
+            sys.stderr.flush()
         if args.i:
             shutil.copy(output_handle.name, fasta_file)
         else:
             dest = '{}.filtered'.format(fasta_file)
             shutil.copy(output_handle.name, dest)
-
