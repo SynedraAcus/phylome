@@ -80,7 +80,7 @@ def assemble_hits(iterable):
     yield BlastHit(query_id=current_query, hit_id=current_hit, hsps=y)
 
 
-def parse_blast_file_to_hsps(filename):
+def parse_blast_file_to_hsps(filename, ignore_trivial=True):
     """
     Take a BLAST output file and generate BlastHSP instances from its lines.
     It assumes the default tabular output from BLAST 2.2.28+ (generated with
@@ -88,16 +88,21 @@ def parse_blast_file_to_hsps(filename):
     Any line starting with `#` is considered a comment and omitted.
     `file` can be either a filehandle in text mode or a filename. In latter case
     it would be opened in `'r'` mode.
+    By default ignores trivial hits (ie ones where hit and query names are
+    identical).
     :param filename: str or filehandle
+    :param ignore_trivial: bool
     :return:
     """
     for line in create_handle(filename):
         if not line[0] == '#':
-            yield parse_blast_line(line)
+            hsp = parse_blast_line(line)
+            if (not hsp.query_id == hsp.hit_id) or (not ignore_trivial):
+                yield hsp
     # Not closing a filehandle because it can be used by the calling code.
 
 
-def parse_blast_file_to_hits(filename):
+def parse_blast_file_to_hits(filename, ignore_trivial=True):
     """
     Take a BLAST output file and generate BlastHit instances from its lines.
     It assumes the default tabular output from BLAST 2.2.28+ (generated with
@@ -108,7 +113,7 @@ def parse_blast_file_to_hits(filename):
     :param filename: str or filehandle
     :return: generator
     """
-    return assemble_hits(parse_blast_file_to_hsps(filename))
+    return assemble_hits(parse_blast_file_to_hsps(filename, ignore_trivial))
 
 
 def iterate_by_query(hits_iterator):
