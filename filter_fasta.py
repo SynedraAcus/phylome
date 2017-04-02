@@ -19,8 +19,10 @@ parser.add_argument('-v', action='store_true',
                     help='Verbose output')
 args = parser.parse_args()
 
-with NamedTemporaryFile(mode='w+') as output_handle:
-    for fasta_file in args.f:
+
+
+for fasta_file in args.f:
+    with NamedTemporaryFile(mode='w+') as output_handle:
         record_count = 0
         accepted_record_count = 0
         for record in SeqIO.parse(fasta_file, format='fasta'):
