@@ -12,7 +12,6 @@ previously repeat-containing gene being split in pieces. Thus, the (ancestral)
 shorter form is always assumed to be in a hit, and the longer in a query.
 """
 
-from blast_parser import BlastHit
 from itertools import combinations
 
 def overlap(range1, range2):

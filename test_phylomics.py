@@ -1,15 +1,15 @@
 #! /usr/bin/env python3
 
 # Not my code, but needed for tests
-import pytest
 import mysql.connector
-
+import pytest
 # Stuff to be tested
-from blast_parser import BlastHSP, parse_blast_line, parse_blast_file_to_hsps, \
+from phylome.blast_parser import BlastHSP, parse_blast_line, parse_blast_file_to_hsps, \
     assemble_hits, BlastHit, parse_blast_file_to_hits
-from multiplicates import is_duplicate
-from taxonomy import descend_taxon_tree, get_taxa_list, is_taxon_member,\
+from phylome.taxonomy import descend_taxon_tree, get_taxa_list, is_taxon_member, \
     get_supertaxon_from_list
+
+from phylome.multiplicates import is_duplicate
 
 
 def test_valid_blast_lines():
