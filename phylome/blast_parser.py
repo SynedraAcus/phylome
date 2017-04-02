@@ -99,7 +99,7 @@ def parse_blast_file_to_hsps(filename, ignore_trivial=True):
             hsp = parse_blast_line(line)
             if (not hsp.query_id == hsp.hit_id) or (not ignore_trivial):
                 yield hsp
-    # Not closing a filehandle because it can be used by the calling code.
+    # Not closing a filehandle because it may be used by the calling code.
 
 
 def parse_blast_file_to_hits(filename, ignore_trivial=True):
@@ -111,6 +111,7 @@ def parse_blast_file_to_hits(filename, ignore_trivial=True):
     `file` can be either a filehandle in text mode or a filename. In latter case
     it would be opened in `'r'` mode.
     :param filename: str or filehandle
+    :param ignore_trivial: bool
     :return: generator
     """
     return assemble_hits(parse_blast_file_to_hsps(filename, ignore_trivial))
@@ -129,13 +130,13 @@ def iterate_by_query(hits_iterator):
     current_query = ''
     #  Probably could be an iterator as well, but I can't design the algorithm.
     hits = []
-    for BlastHit in hits_iterator:
+    for blasthit in hits_iterator:
         if not current_query:
-            current_query = BlastHit.query_id
-        if BlastHit.query_id == current_query:
-            hits.append(BlastHit)
+            current_query = blasthit.query_id
+        if blasthit.query_id == current_query:
+            hits.append(blasthit)
         else:
             yield hits
-            hits = [BlastHit]
-            current_query = BlastHit.query_id
+            hits = [blasthit]
+            current_query = blasthit.query_id
     yield hits

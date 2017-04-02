@@ -7,6 +7,11 @@ A collection of tools for phylomic analysis.
 #### ~~clusterize.py~~ **OBSOLETE**
 Takes a multiFASTA file(s) and does a simple distance-based clustering
 using FFP distance metric.
+
+#### cluster_diatoms.py
+Clusters potentially homologous sequences based on BLAST output. The
+algorithm is approximately similar to that of COG
+
 #### filter_fasta.py
 Takes a multiFASTA file(s) and removes sequences that are too short or
 contain too many `X` characters.

@@ -20,7 +20,6 @@ parser.add_argument('-v', action='store_true',
 args = parser.parse_args()
 
 
-
 for fasta_file in args.f:
     with NamedTemporaryFile(mode='w+') as output_handle:
         record_count = 0

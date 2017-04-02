@@ -1,5 +1,5 @@
 """
-A bunch of functions to test for a multiple/nonmultiple hit.
+A function to test for a multiple/nonmultiple hit.
 The detection of multiplicated genes is valuable both by itself (as a chapter in
 my thesis) and as a stage in a phylomic analysis. An alignment of multiplicated
 gene to its non-multiplicated counterpart is unreliable, as the short one will
@@ -13,6 +13,7 @@ shorter form is always assumed to be in a hit, and the longer in a query.
 """
 
 from itertools import combinations
+
 
 def overlap(range1, range2):
     """
@@ -51,7 +52,7 @@ def is_duplicate(hit, overlap_cutoff=0.5, len_cutoff=50):
     :return:
     """
     if len(hit.hsps) < 2:
-        #  Obviously there is no point in working with one-HSP hits
+        #  Obviously one-HSP hit can't have the evidence we look for
         return False
     valid_hsps = filter(lambda x: abs(x.hit_pos[1]-x.hit_pos[0]) > len_cutoff,
                         hit.hsps)
