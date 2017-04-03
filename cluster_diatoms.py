@@ -65,5 +65,5 @@ for query in iterate_by_query(parse_blast_file_to_hits(args.b)):
 with open('{}.clusters.list'.format(args.n), mode='w') as cluster_file:
     for index in range(len(clusters)):
         # Print cluster ID followed by the tab-separated list of sequences
-        print('{}\t'.format(args.n) + '\t'.join(clusters[index]),
+        print('{}\t'.format(str(index)) + '\t'.join(clusters[index]),
               file=cluster_file)
