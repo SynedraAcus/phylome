@@ -34,7 +34,6 @@ def get_best_cluster_index(cluster_list, query):
     return best_cluster_index
 
 
-
 parser = ArgumentParser(description='Cluster diatom sequences based on BLAST')
 parser.add_argument('-b', type=str, help='BLAST tabular file')
 parser.add_argument('-f', type=str, help='FASTA file')
