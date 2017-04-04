@@ -39,7 +39,8 @@ def parse_blast_line(line):
     :param line: str
     :return: BlastHSP
     """
-    line = line.rstrip('\n')
+    # Last field is ignored anyway
+    # line = line.rstrip('\n')
     arr = line.split('\t')
     if not len(arr) == 12:
         raise ValueError('Incorrect BLAST line {}'.format(line))
@@ -97,7 +98,7 @@ def parse_blast_file_to_hsps(filename, ignore_trivial=True):
     for line in create_handle(filename):
         if not line[0] == '#':
             hsp = parse_blast_line(line)
-            if (not hsp.query_id == hsp.hit_id) or (not ignore_trivial):
+            if (not ignore_trivial) or (not hsp.query_id == hsp.hit_id):
                 yield hsp
     # Not closing a filehandle because it may be used by the calling code.
 

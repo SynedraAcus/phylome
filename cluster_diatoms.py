@@ -5,29 +5,13 @@ from phylome.blast_parser import *
 from math import log10
 
 
-def get_hsp_score(hsp):
-    return -log10(hsp.evalue) if hsp.evalue > 0 else 1000
-
-
 def get_hit_score(hit):
     """
     Score is -log10(evalue) or 1000 if evalue==0
     :param evalue: 
     :return: 
     """
-    return max(get_hsp_score(hsp) for hsp in hit.hsps)
-
-
-def get_cluster_score(cluster, query):
-    """
-    Return a cluster score
-    Score is a sum of hit scores, which, in turn, are -log10(evalue of best hsp)
-    for every hit in query that is present in a cluster 
-    :param cluster: a list of IDs
-    :param query: a list of hits
-    :return: 
-    """
-    return sum(get_hit_score(hit) for hit in query if hit.hit_id in cluster)
+    return max(-log10(hsp.evalue) if hsp.evalue > 0 else 1000 for hsp in hit.hsps)
 
 
 def get_best_cluster_index(cluster_list, query):
@@ -40,7 +24,13 @@ def get_best_cluster_index(cluster_list, query):
     best_cluster_index = None
     best_score = 0
     for index in range(len(cluster_list)):
-        score = get_cluster_score(cluster_list[index], query)
+        # Iterate once instead of checking for the presence of *every* hit on
+        # the next line. Maybe will save some time with large queries being
+        # checked against the wrong clusters
+        if not any(x.hit_id in cluster_list[index] for x in query):
+            continue
+        score = sum(get_hit_score(hit) for hit in query
+                    if hit.hit_id in cluster_list[index])
         if score > best_score:
             best_cluster_index = index
     return best_cluster_index
