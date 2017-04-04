@@ -3,7 +3,7 @@
 from argparse import ArgumentParser
 from phylome.blast_parser import *
 from math import log10
-
+from sys import stderr
 
 def get_hit_score(hit):
     """
@@ -41,9 +41,11 @@ parser.add_argument('-b', type=str, help='BLAST tabular file')
 parser.add_argument('-f', type=str, help='FASTA file')
 parser.add_argument('-n', type=str, help='Base name for output files',
                     default='clusters')
+parser.add_argument('-v', type=str, help='Produce STDERR output')
 args = parser.parse_args()
 
 clusters = []
+query_count = 0
 for query in iterate_by_query(parse_blast_file_to_hits(args.b)):
     best_cluster_index = get_best_cluster_index(clusters, query)
     if best_cluster_index:
@@ -51,6 +53,11 @@ for query in iterate_by_query(parse_blast_file_to_hits(args.b)):
     else:
         # Taking query[0] because they all have the same query ID anyway
         clusters.append([query[0].query_id])
+    query_count += 1
+    if query_count % 10000 == 0:
+        stderr.write('{} queries processed, {} clusters created'.format(
+            query_count, len(clusters)
+        ))
 
 with open('{}.clusters.list'.format(args.n), mode='w') as cluster_file:
     for index in range(len(clusters)):
