@@ -51,13 +51,13 @@ query_count = 0
 for query in iterate_by_query(parse_blast_file_to_hits(args.b)):
     best_cluster_index = get_best_cluster_index(clusters, query)
     if best_cluster_index:
-        clusters[best_cluster_index].append(query[0].query_id)
+        clusters[best_cluster_index].add(query[0].query_id)
     else:
         # Taking query[0] because they all have the same query ID anyway
-        clusters.append([query[0].query_id])
+        clusters.append({query[0].query_id})
     query_count += 1
-    if query_count % args.c == 0:
-        stderr.write('{} queries processed, {} clusters created'.format(
+    if args.v and query_count % args.c == 0:
+        stderr.write('{} queries processed, {} clusters created\n'.format(
             query_count, len(clusters)
         ))
         stderr.flush()
