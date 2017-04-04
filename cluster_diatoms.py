@@ -42,6 +42,7 @@ parser.add_argument('-f', type=str, help='FASTA file')
 parser.add_argument('-n', type=str, help='Base name for output files',
                     default='clusters')
 parser.add_argument('-v', type=str, help='Produce STDERR output')
+parser.add_argument('-c', type=int, help='Debug lines frequency')
 args = parser.parse_args()
 
 clusters = []
@@ -54,7 +55,7 @@ for query in iterate_by_query(parse_blast_file_to_hits(args.b)):
         # Taking query[0] because they all have the same query ID anyway
         clusters.append([query[0].query_id])
     query_count += 1
-    if query_count % 10000 == 0:
+    if query_count % args.c == 0:
         stderr.write('{} queries processed, {} clusters created'.format(
             query_count, len(clusters)
         ))
