@@ -41,8 +41,9 @@ parser.add_argument('-b', type=str, help='BLAST tabular file')
 parser.add_argument('-f', type=str, help='FASTA file')
 parser.add_argument('-n', type=str, help='Base name for output files',
                     default='clusters')
-parser.add_argument('-v', type=str, help='Produce STDERR output')
+parser.add_argument('-v', action='store_true', help='Produce STDERR output')
 parser.add_argument('-c', type=int, help='Debug lines frequency')
+parser.add_argument('-t', type='store_true', help='Store clusters file every 10k queries')
 args = parser.parse_args()
 
 clusters = []
@@ -59,6 +60,14 @@ for query in iterate_by_query(parse_blast_file_to_hits(args.b)):
         stderr.write('{} queries processed, {} clusters created'.format(
             query_count, len(clusters)
         ))
+        stderr.flush()
+    if args.t and query_count % 10000 == 0:
+        with open('{}.clusters.list'.format(args.n), mode='w') as cluster_file:
+            for index in range(len(clusters)):
+                # Print cluster ID followed by the tab-separated list of sequences
+                print('{}\t'.format(str(index)) + '\t'.join(clusters[index]),
+                      file=cluster_file)
+
 
 with open('{}.clusters.list'.format(args.n), mode='w') as cluster_file:
     for index in range(len(clusters)):
