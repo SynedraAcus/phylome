@@ -43,7 +43,7 @@ parser.add_argument('-n', type=str, help='Base name for output files',
                     default='clusters')
 parser.add_argument('-v', action='store_true', help='Produce STDERR output')
 parser.add_argument('-c', type=int, help='Debug lines frequency')
-parser.add_argument('-t', type='store_true', help='Store clusters file every 10k queries')
+parser.add_argument('-t', action='store_true', help='Store clusters file every 10k queries')
 args = parser.parse_args()
 
 clusters = []
