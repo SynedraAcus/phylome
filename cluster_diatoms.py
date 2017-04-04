@@ -1,9 +1,11 @@
 #! /usr/bin/env python3
 
 from argparse import ArgumentParser
-from phylome.blast_parser import *
 from math import log10
 from sys import stderr
+
+from phylome.blast_parser import *
+
 
 def get_hit_score(hit):
     """
@@ -46,55 +48,29 @@ parser.add_argument('-c', type=int, help='Debug lines frequency')
 parser.add_argument('-t', action='store_true', help='Store clusters file every 10k queries')
 args = parser.parse_args()
 
-# clusters = []
-# query_count = 0
-# for query in iterate_by_query(parse_blast_file_to_hits(args.b)):
-#     best_cluster_index = get_best_cluster_index(clusters, query)
-#     if best_cluster_index:
-#         clusters[best_cluster_index].add(query[0].query_id)
-#     else:
-#         # Taking query[0] because they all have the same query ID anyway
-#         clusters.append({query[0].query_id})
-#     query_count += 1
-#     if args.v and query_count % args.c == 0:
-#         stderr.write('{} queries processed, {} clusters created\n'.format(
-#             query_count, len(clusters)
-#         ))
-#         stderr.flush()
-#     if args.t and query_count % 10000 == 0:
-#         with open('{}.clusters.list'.format(args.n), mode='w') as cluster_file:
-#             for index in range(len(clusters)):
-#                 # Print cluster ID followed by the tab-separated list of sequences
-#                 print('{}\t'.format(str(index)) + '\t'.join(clusters[index]),
-#                       file=cluster_file)
+# Loading data
 hits = {}
 for query in iterate_by_query(parse_blast_file_to_hits(args.b)):
     hits[query[0].query_id] = set(hit.hit_id for hit in query)
-
-stderr.write('Removing non-reciprocal hits')
+print('Removing non-reciprocal hits', file=stderr)
 stderr.flush()
 for query in hits.keys():
     hits[query] = set(hit for hit in hits[query] if query in hits[hit])
+
 # Clustering
 clusters = []
-while len(hits) > 0:
-    cluster = set()
-    queries = [next(iter(hits.keys()))]
-    while len(queries) > 0:
-        query = queries.pop()
-        new = set(x for x in hits[query] if x not in cluster)
-        queries.extend(new)
-        cluster.add(query)
-    clusters.append(cluster)
-    print(cluster)
-    for x in cluster:
-        del hits[x]
-print(clusters)
-
-
-
+cluster_id = 0
 with open('{}.clusters.list'.format(args.n), mode='w') as cluster_file:
-    for index in range(len(clusters)):
-        # Print cluster ID followed by the tab-separated list of sequences
-        print('{}\t'.format(str(index)) + '\t'.join(clusters[index]),
-              file=cluster_file)
+    while len(hits) > 0:
+        cluster = set()
+        queries = [next(iter(hits.keys()))]
+        while len(queries) > 0:
+            query = queries.pop()
+            new = set(x for x in hits[query] if x not in cluster)
+            queries.extend(new)
+            cluster.add(query)
+        clusters.append(cluster)
+        cluster_id += 1
+        print(cluster_id, cluster, file=cluster_file)
+        for x in cluster:
+            del hits[x]
