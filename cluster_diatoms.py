@@ -41,22 +41,30 @@ def get_best_cluster_index(cluster_list, query):
 parser = ArgumentParser(description='Cluster diatom sequences based on BLAST')
 parser.add_argument('-b', type=str, help='BLAST tabular file')
 parser.add_argument('-f', type=str, help='FASTA file')
+parser.add_argument('-e', type=float, help='e-value cutoff. Default 1e-5',
+                    default=1e-5)
 parser.add_argument('-n', type=str, help='Base name for output files',
                     default='clusters')
 parser.add_argument('-v', action='store_true', help='Produce STDERR output')
 parser.add_argument('-c', type=int, help='Debug lines frequency')
-parser.add_argument('-t', action='store_true', help='Store clusters file every 10k queries')
 args = parser.parse_args()
 
 # Loading data
+if args.v:
+    stderr.write('Loading hits... ')
 hits = {}
 for query in iterate_by_query(parse_blast_file_to_hits(args.b)):
-    hits[query[0].query_id] = set(hit.hit_id for hit in query)
-print('Removing non-reciprocal hits', file=stderr)
+    hits[query[0].query_id] = set(hit.hit_id for hit in query
+                          if min(hsp.evalue for hsp in hit.hsps) < args.e)
+if args.v:
+    stderr.write('{} loaded.\n'.format(len(hits)))
+    print('Removing non-reciprocal hits...', file=stderr)
 stderr.flush()
 for query in hits.keys():
     hits[query] = set(hit for hit in hits[query] if query in hits[hit])
 
+if args.v:
+    print('Begin clustering')
 # Clustering
 clusters = []
 cluster_id = 0
@@ -70,7 +78,10 @@ with open('{}.clusters.list'.format(args.n), mode='w') as cluster_file:
             queries.extend(new)
             cluster.add(query)
         clusters.append(cluster)
-        cluster_id += 1
-        print(cluster_id, cluster, file=cluster_file)
         for x in cluster:
             del hits[x]
+        cluster_id += 1
+        print(cluster_id, cluster, file=cluster_file)
+        if args.v and cluster_id % args.c == 0:
+            print('Built {} clusters'.format(cluster_id), file=stderr)
+        
