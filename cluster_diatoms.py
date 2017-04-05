@@ -61,7 +61,8 @@ if args.v:
     print('Removing non-reciprocal hits...', file=stderr)
 stderr.flush()
 for query in hits.keys():
-    hits[query] = set(hit for hit in hits[query] if query in hits[hit])
+    hits[query] = set(hit for hit in hits[query]
+                      if hit in hits.keys() and query in hits[hit])
 
 if args.v:
     print('Begin clustering')
