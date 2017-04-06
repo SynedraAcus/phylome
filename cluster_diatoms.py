@@ -94,7 +94,7 @@ with open('{}.cluster_sizes'.format(args.n), mode='w') as data_file:
     lengths = [len(x) for x in clusters]
     lengths.sort()
     len_counts = Counter(lengths)
-    for i in len_counts.keys():
+    for i in sorted(len_counts.keys()):
         print('{}\t{}'.format(i, len_counts[i]), file=data_file)
     
         
