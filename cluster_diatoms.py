@@ -1,6 +1,7 @@
 #! /usr/bin/env python3
 
 from argparse import ArgumentParser
+from collections import Counter
 from math import log10
 from sys import stderr
 
@@ -46,7 +47,7 @@ parser.add_argument('-e', type=float, help='e-value cutoff. Default 1e-5',
 parser.add_argument('-n', type=str, help='Base name for output files',
                     default='clusters')
 parser.add_argument('-v', action='store_true', help='Produce STDERR output')
-parser.add_argument('-c', type=int, help='Debug lines frequency')
+parser.add_argument('-c', type=int, help='Debug lines frequency', default=10000)
 args = parser.parse_args()
 
 # Loading data
@@ -85,4 +86,15 @@ with open('{}.clusters.list'.format(args.n), mode='w') as cluster_file:
         print(cluster_id, cluster, file=cluster_file)
         if args.v and cluster_id % args.c == 0:
             print('Built {} clusters'.format(cluster_id), file=stderr)
+
+#  Printing cluster data
+if args.v:
+    print('Calculating cluster stats', file=stderr)
+with open('{}.cluster_sizes'.format(args.n), mode='w') as data_file:
+    lengths = [len(x) for x in clusters]
+    lengths.sort()
+    len_counts = Counter(lengths)
+    for i in len_counts.keys():
+        print('{}\t{}'.format(i, len_counts[i]), file=data_file)
+    
         
