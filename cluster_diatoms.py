@@ -48,6 +48,7 @@ parser.add_argument('-n', type=str, help='Base name for output files',
                     default='clusters')
 parser.add_argument('-v', action='store_true', help='Produce STDERR output')
 parser.add_argument('-c', type=int, help='Debug lines frequency', default=10000)
+parser.add_argument('-r', action='store_false', help='Ignore non-reciprocal hits')
 args = parser.parse_args()
 
 # Loading data
@@ -57,13 +58,14 @@ hits = {}
 for query in iterate_by_query(parse_blast_file_to_hits(args.b)):
     hits[query[0].query_id] = set(hit.hit_id for hit in query
                           if min(hsp.evalue for hsp in hit.hsps) < args.e)
-if args.v:
-    stderr.write('{} loaded.\n'.format(len(hits)))
-    print('Removing non-reciprocal hits...', file=stderr)
-stderr.flush()
-for query in hits.keys():
-    hits[query] = set(hit for hit in hits[query]
-                      if hit in hits.keys() and query in hits[hit])
+if args.r:
+    if args.v:
+        stderr.write('{} loaded.\n'.format(len(hits)))
+        print('Removing non-reciprocal hits...', file=stderr)
+    stderr.flush()
+    for query in hits.keys():
+        hits[query] = set(hit for hit in hits[query]
+                          if hit in hits.keys() and query in hits[hit])
 
 if args.v:
     print('Begin clustering')
