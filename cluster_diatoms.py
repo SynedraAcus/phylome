@@ -8,40 +8,8 @@ from sys import stderr
 from phylome.blast_parser import *
 
 
-def get_hit_score(hit):
-    """
-    Score is -log10(evalue) or 1000 if evalue==0
-    :param evalue: 
-    :return: 
-    """
-    return max(-log10(hsp.evalue) if hsp.evalue > 0 else 1000 for hsp in hit.hsps)
-
-
-def get_best_cluster_index(cluster_list, query):
-    """
-    Return the index of the best cluster or None if no cluster is present
-    :param cluster_list: 
-    :param query: 
-    :return: 
-    """
-    best_cluster_index = None
-    best_score = 0
-    for index in range(len(cluster_list)):
-        # Iterate once instead of checking for the presence of *every* hit on
-        # the next line. Maybe will save some time with large queries being
-        # checked against the wrong clusters
-        if not any(x.hit_id in cluster_list[index] for x in query):
-            continue
-        score = sum(get_hit_score(hit) for hit in query
-                    if hit.hit_id in cluster_list[index])
-        if score > best_score:
-            best_cluster_index = index
-    return best_cluster_index
-
-
 parser = ArgumentParser(description='Cluster diatom sequences based on BLAST')
 parser.add_argument('-b', type=str, help='BLAST tabular file')
-parser.add_argument('-f', type=str, help='FASTA file')
 parser.add_argument('-e', type=float, help='e-value cutoff. Default 1e-5',
                     default=1e-5)
 parser.add_argument('-n', type=str, help='Base name for output files',
@@ -69,6 +37,7 @@ if args.r:
 
 if args.v:
     print('Begin clustering')
+
 # Clustering
 clusters = []
 cluster_id = 0
