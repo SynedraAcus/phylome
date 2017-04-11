@@ -16,9 +16,16 @@ parser.add_argument('-n', type=str, help='Base name for output files',
                     default='clusters')
 parser.add_argument('-v', action='store_true', help='Produce STDERR output')
 parser.add_argument('-c', type=int, help='Debug lines frequency', default=10000)
-parser.add_argument('-r', action='store_false', help='Ignore non-reciprocal hits')
+parser.add_argument('-r', action='store_false', help='Ignore non-reciprocal hits. Default False.')
+parser.add_argument('-a', type=str, help='Clustering algorithm. One of slc (for single-linkage clustering) or mcl (for Markov clustering).',
+                    default='slc')
 args = parser.parse_args()
 
+
+#
+if args.a not in ('slc', 'mcl'):
+    stderr.write('Incorrect algorithm')
+    quit()
 # Loading data
 if args.v:
     stderr.write('Loading hits... ')
@@ -39,24 +46,28 @@ if args.v:
     print('Begin clustering')
 
 # Clustering
+#  Any clustering method should populate clusters list
 clusters = []
-cluster_id = 0
-with open('{}.clusters.list'.format(args.n), mode='w') as cluster_file:
-    while len(hits) > 0:
-        cluster = set()
-        queries = [next(iter(hits.keys()))]
-        while len(queries) > 0:
-            query = queries.pop()
-            new = set(x for x in hits[query] if x not in cluster)
-            queries.extend(new)
-            cluster.add(query)
-        clusters.append(cluster)
-        for x in cluster:
-            del hits[x]
-        cluster_id += 1
-        print(cluster_id, cluster, file=cluster_file)
-        if args.v and cluster_id % args.c == 0:
-            print('Built {} clusters'.format(cluster_id), file=stderr)
+if args.a == 'slc':
+    cluster_id = 0
+    with open('{}.clusters.list'.format(args.n), mode='w') as cluster_file:
+        while len(hits) > 0:
+            cluster = set()
+            queries = [next(iter(hits.keys()))]
+            while len(queries) > 0:
+                query = queries.pop()
+                new = set(x for x in hits[query] if x not in cluster)
+                queries.extend(new)
+                cluster.add(query)
+            clusters.append(cluster)
+            for x in cluster:
+                del hits[x]
+            cluster_id += 1
+            print(cluster_id, cluster, file=cluster_file)
+            if args.v and cluster_id % args.c == 0:
+                print('Built {} clusters'.format(cluster_id), file=stderr)
+elif args.a == 'mcl':
+    raise NotImplementedError('Markov clustering is not implemented yet')
 
 #  Printing cluster data
 if args.v:
