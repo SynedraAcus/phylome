@@ -32,13 +32,34 @@ def slc(hits_graph, write_log=True, log_frequency=10000):
     return clusters
 
 
-def mcl(hits_graph):
+def mcl(hits_graph, expand_factor=2, inflate_factor=2,
+        max_loop=10, mult_factor=1):
     """
     Return clusters in hits graph as detected by MCL clustering algorithm
-    :param hits_graph: 
+    Basically a wrapper around python_mcl's mcl function that allows to use
+    hits graph instead of a matrix
+    :param hits_graph: list of hit sets
     :return: 
     """
-    raise NotImplementedError('MCL clustering is not yet working')
+    # Importing here to allow slc to work without numpy
+    import numpy as np
+    from phylome.mcl_clustering import mcl
+    keys = tuple(hits_graph.keys())
+    l = len(keys)
+    matrix = np.zeros((l, l))
+    for x in range(len(keys)):
+        edge_probability = 1/len(hits_graph[keys[x]])
+        for y in range(len(keys)):
+            if keys[y] in hits_graph[keys[x]]:
+                matrix[x, y] = edge_probability
+    _, cluster_dict = mcl(matrix, expand_factor=expand_factor,
+                      inflate_factor=inflate_factor, max_loop=max_loop,
+                      mult_factor=mult_factor)
+    # print(cluster_dict)
+    clusters = []
+    for cluster in cluster_dict.values():
+        clusters.append(set((keys[x] for x in cluster)))
+    return clusters
 
 
 parser = ArgumentParser(description='Cluster diatom sequences based on BLAST')
@@ -85,7 +106,9 @@ if args.v:
 if args.a == 'slc':
     clusters = slc(hits, write_log=args.v, log_frequency=args.c)
 elif args.a == 'mcl':
-    raise NotImplementedError('Markov clustering is not implemented yet')
+    clusters = mcl(hits)
+    print(clusters)
+    quit()
 
 # Writing clusters
 with open('{}.clusters.list'.format(args.n), mode='w') as cluster_file:
