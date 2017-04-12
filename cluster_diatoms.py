@@ -75,6 +75,8 @@ parser.add_argument('-c', type=int, help='Debug lines frequency. Works only with
 parser.add_argument('-r', action='store_false', help='Ignore non-reciprocal hits. Default False.')
 parser.add_argument('-a', type=str, help='Clustering algorithm. One of slc (for single-linkage clustering) or mcl (for Markov clustering).',
                     default='slc')
+parser.add_argument('-i', type=float, default=1.5,
+                    help='Inflation factor for MCL algorithm. Default 1.5')
 args = parser.parse_args()
 
 
@@ -107,7 +109,7 @@ if args.v:
 if args.a == 'slc':
     clusters = slc(hits, write_log=args.v, log_frequency=args.c)
 elif args.a == 'mcl':
-    clusters = mcl(hits)
+    clusters = mcl(hits, inflate_factor=args.i)
 
 
 # Writing clusters
