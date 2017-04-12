@@ -38,7 +38,7 @@ def get_clusters(A):
     clust_map = {}
     for cn, c in enumerate(clusters):
         for x in [i for i, x in enumerate(c) if x]:
-            clust_map[cn] = clust_map.get(cn, []) + [x]
+            clust_map[cn] = clust_map.get(cn, []) + [x, ]
     return clust_map
 
 
@@ -88,7 +88,8 @@ def mcl(M, expand_factor=2, inflate_factor=2, max_loop=10, mult_factor=1):
         if stop(M, i): break
 
     clusters = get_clusters(M)
-    return M, clusters
+    #  Disabled returning matrix as I won't need it later and it would waste RAM
+    return clusters
 
 
 def networkx_mcl(G, expand_factor=2, inflate_factor=2, max_loop=10,

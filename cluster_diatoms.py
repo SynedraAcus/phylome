@@ -15,24 +15,25 @@ def slc(hits_graph, write_log=True, log_frequency=10000):
     """
     clusters = []
     cluster_id = 0
-    while len(hits) > 0:
+    while len(hits_graph) > 0:
         cluster = set()
         queries = [next(iter(hits_graph.keys()))]
         while len(queries) > 0:
             query = queries.pop()
-            new = set(x for x in hits_graph[query] if x not in cluster)
+            new = set(x for x in hits_graph[query] if x not in cluster and x in hits_graph)
             queries.extend(new)
             cluster.add(query)
         clusters.append(cluster)
         for x in cluster:
-            del hits[x]
+            if x in hits_graph:
+                del hits_graph[x]
         cluster_id += 1
         if write_log and cluster_id % log_frequency == 0:
             print('Built {} clusters'.format(cluster_id), file=stderr)
     return clusters
 
 
-def mcl(hits_graph, expand_factor=2, inflate_factor=2,
+def mcl(hits_graph, expand_factor=2, inflate_factor=1.5,
         max_loop=10, mult_factor=1):
     """
     Return clusters in hits graph as detected by MCL clustering algorithm
@@ -47,19 +48,19 @@ def mcl(hits_graph, expand_factor=2, inflate_factor=2,
     keys = tuple(hits_graph.keys())
     l = len(keys)
     matrix = np.zeros((l, l))
-    for x in range(len(keys)):
+    for x in range(len(keys)):  # IMO a bit cleaner than enumerate
         edge_probability = 1/len(hits_graph[keys[x]])
         for y in range(len(keys)):
             if keys[y] in hits_graph[keys[x]]:
                 matrix[x, y] = edge_probability
-    _, cluster_dict = mcl(matrix, expand_factor=expand_factor,
+    cluster_dict = mcl(matrix, expand_factor=expand_factor,
                       inflate_factor=inflate_factor, max_loop=max_loop,
                       mult_factor=mult_factor)
-    # print(cluster_dict)
-    clusters = []
-    for cluster in cluster_dict.values():
-        clusters.append(set((keys[x] for x in cluster)))
-    return clusters
+    del matrix  # Free some memory
+    cluster_list = []
+    for cluster in slc(cluster_dict):
+        cluster_list.append(set(keys[i] for i in cluster))
+    return cluster_list
 
 
 parser = ArgumentParser(description='Cluster diatom sequences based on BLAST')
@@ -107,8 +108,7 @@ if args.a == 'slc':
     clusters = slc(hits, write_log=args.v, log_frequency=args.c)
 elif args.a == 'mcl':
     clusters = mcl(hits)
-    print(clusters)
-    quit()
+
 
 # Writing clusters
 with open('{}.clusters.list'.format(args.n), mode='w') as cluster_file:
@@ -124,4 +124,3 @@ with open('{}.cluster_sizes'.format(args.n), mode='w') as data_file:
     len_counts = Counter(lengths)
     for i in sorted(len_counts.keys()):
         print('{}\t{}'.format(i, len_counts[i]), file=data_file)
-
