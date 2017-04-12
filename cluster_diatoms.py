@@ -58,7 +58,7 @@ args = parser.parse_args()
 
 #
 if args.a not in ('slc', 'mcl'):
-    stderr.write('Incorrect algorithm')
+    stderr.write('Incorrect algorithm\n')
     quit()
 # Loading data
 if args.v:
@@ -67,18 +67,21 @@ hits = {}
 for query in iterate_by_query(parse_blast_file_to_hits(args.b)):
     hits[query[0].query_id] = set(hit.hit_id for hit in query
                           if min(hsp.evalue for hsp in hit.hsps) < args.e)
+if args.v:
+    stderr.write('{} loaded.\n'.format(len(hits)))
+    stderr.flush()
 if args.r:
     if args.v:
-        stderr.write('{} loaded.\n'.format(len(hits)))
-        print('Removing non-reciprocal hits...', file=stderr)
-    stderr.flush()
+        stderr.write('Removing non-reciprocal hits...')
     for query in hits.keys():
         hits[query] = set(hit for hit in hits[query]
                           if hit in hits.keys() and query in hits[hit])
+    if args.v:
+        stderr.write('{} remained\n'.format(len(hits)))
 
 # Clustering
 if args.v:
-    print('Begin clustering')
+    stderr.write('Begin clustering\n')
 if args.a == 'slc':
     clusters = slc(hits, write_log=args.v, log_frequency=args.c)
 elif args.a == 'mcl':
