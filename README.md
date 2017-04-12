@@ -1,6 +1,7 @@
 # Phylome
 
-A collection of tools for phylomic analysis.
+A collection of tools for phylomic analysis. Depends on Biopython and
+numpy to work.
 
 ### Scripts
 
@@ -29,3 +30,7 @@ DB).
 #### phylome.taxonomy
 A few functions to query NCBI taxonomy database. Assumes database to be
 stored in a mySQL instance
+
+#### mcl_clustering
+A copy of [koteth's implementation of MCL](https://github.com/koteth/python_mcl)
+Requires numpy to work.
