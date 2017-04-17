@@ -2,14 +2,49 @@
 
 from argparse import ArgumentParser
 from collections import Counter
+from copy import deepcopy
 from sys import stderr
 
 from phylome.blast_parser import *
 
 
+def reduce_graph(hits_graph, l):
+    """
+    Retain only edges between vertices that share no less than l neighbours.
+    l is a proportion of shared neighbours to neighbour count of a node that has
+    less neighbours
+    :param hits_graph: dict of sets
+    :param l: float
+    :return:
+    """
+    # A copy of graph avoids creating artifacts by the order of edge processing
+    new_graph = deepcopy(hits_graph)
+    for item in hits_graph.keys():
+        neighbours = hits_graph[item]
+        for neighbour in neighbours:
+            # Edge between the two nodes in question is considered a neighbour
+            # for elimination purposes
+            shared_neighbours = \
+                len(hits_graph[item].intersection(hits_graph[neighbour])) + 1
+            if shared_neighbours < min(len(hits_graph[item]),
+                                        len(hits_graph[neighbour])) * l:
+                #  Removing edges if there are not enough shared neighbours
+                #  These try/except constructions are necessary in a
+                #  non-reciprocal hits graph
+                try:
+                    new_graph[item].remove(neighbour)
+                except KeyError:
+                    pass
+                try:
+                    new_graph[neighbour].remove(item)
+                except KeyError:
+                    pass
+    return new_graph
+    
+
 def slc(hits_graph, write_log=True, log_frequency=10000):
     """
-    Return clusters in graph as detected by single-linkage clustering
+    Return connected components in the graph
     :param hits_graph: 
     :return: 
     """
@@ -63,6 +98,16 @@ def mcl(hits_graph, expand_factor=2, inflate_factor=1.5,
     return cluster_list
 
 
+def red(hits_graph, l):
+    """
+    Reduce the graph and produce clusters in the reduced one
+    :param hits_graph:
+    :param l:
+    :return:
+    """
+    return slc(reduce_graph(hits_graph, l))
+
+
 parser = ArgumentParser(description='Cluster diatom sequences based on BLAST')
 parser.add_argument('-b', type=str, help='BLAST tabular file')
 parser.add_argument('-e', type=float, help='e-value cutoff. Default 1e-5',
@@ -73,15 +118,17 @@ parser.add_argument('-v', action='store_true', help='Produce STDERR output')
 parser.add_argument('-c', type=int, help='Debug lines frequency. Works only with slc clustering',
                     default=10000)
 parser.add_argument('-r', action='store_false', help='Ignore non-reciprocal hits. Default False.')
-parser.add_argument('-a', type=str, help='Clustering algorithm. One of slc (for single-linkage clustering) or mcl (for Markov clustering).',
+parser.add_argument('-a', type=str, help='Clustering algorithm. One of slc (for single-linkage clustering) or mcl (for Markov clustering) or red fpr graph reduction.',
                     default='slc')
 parser.add_argument('-i', type=float, default=1.5,
                     help='Inflation factor for MCL algorithm. Default 1.5')
+parser.add_argument('-l', type=float, default=0.5,
+                    help='Shared neighbours proportion for graph reduction')
 args = parser.parse_args()
 
 
 #
-if args.a not in ('slc', 'mcl'):
+if args.a not in ('slc', 'mcl', 'red'):
     stderr.write('Incorrect algorithm\n')
     quit()
 # Loading data
@@ -110,6 +157,9 @@ if args.a == 'slc':
     clusters = slc(hits, write_log=args.v, log_frequency=args.c)
 elif args.a == 'mcl':
     clusters = mcl(hits, inflate_factor=args.i)
+elif args.a == 'red':
+    clusters = red(hits, l=args.l)
+
 
 
 # Writing clusters
