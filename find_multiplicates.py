@@ -28,7 +28,8 @@ parser.add_argument('-b', type=str, help='BLAST TSV file')
 parser.add_argument('-f', type=str, default='',
                     help='FASTA file of queries')
 parser.add_argument('-o', type=float, help='Overlap cutoff. Default 0.5')
-parser.add_argument('-l', type=int, help='Length cutoff. Default 50')
+parser.add_argument('-l', type=int, default=50,
+                    help='Length cutoff. Default 50')
 parser.add_argument('-c', type=float, default=0.5,
                     help='Duplicate hit percentage. Default 0.5')
 parser.add_argument('-n', type=str, default='multiples',
