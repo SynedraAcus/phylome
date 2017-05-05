@@ -78,5 +78,5 @@ go_names = read_obo_file(args.o)
 for x in sorted(gos.keys(), key=lambda x: gos[x], reverse=True):
     try:
         print('{}\t{}'.format(go_names[x], gos[x]))
-    except Keyerror:
+    except KeyError:
         print('GO:{}\t{}'.format(x, gos[x]))
