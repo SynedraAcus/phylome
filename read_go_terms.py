@@ -76,4 +76,7 @@ for line_group in yield_query_groups(open(args.g)):
 print('Reading OBO...', file=sys.stderr)
 go_names = read_obo_file(args.o)
 for x in sorted(gos.keys(), key=lambda x: gos[x], reverse=True):
-    print('{}\t{}'.format(go_names[x], gos[x]))
+    try:
+        print('{}\t{}'.format(go_names[x], gos[x]))
+    except Keyerror:
+        print('GO:{}\t{}'.format(x, gos[x]))
