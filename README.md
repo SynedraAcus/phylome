@@ -18,6 +18,10 @@ Takes a BLAST TSV file and (optionally) a multiFASTA. Returns IDs and
 Takes a multiFASTA file(s) and removes sequences that are too short or
 contain too many `X` characters.
 
+### one-shots
+A bunch of single-use scripts, mostly for reading one or another analysis
+results. These are extremely quick-and-dirty and are unreliable at best
+when used not for the original analysis.
 ### phylome
 
 A collection of modules useful for a phylomic analysis.
