@@ -17,7 +17,8 @@ def lowercase_count(line):
     count = 0
     for letter in line:
         if letter.islower() or letter == 'X':
-    count += 1
+            count += 1
+    return count
 
 with open('{}.filtered'.format(args.f), mode='w') as outfasta:
     for record in SeqIO.parse(args.f, 'fasta'):
