@@ -47,4 +47,4 @@ for blast_hit in parse_blast_file_to_hits(args.nr_blast):
 clusters = [x.union(y) for x, y in zip(diatom_components, nr_components)]
 with open(args.o, mode='w') as outfile:
     for cluster in clusters:
-        print(list(cluster), file=outfile)
+        print(cluster, file=outfile)
