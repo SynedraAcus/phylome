@@ -64,14 +64,14 @@ def slc(hits_graph, write_log=True, log_frequency=10000):
                 del hits_graph[x]
         cluster_id += 1
         if write_log and cluster_id % log_frequency == 0:
-            print('Built {} clusters'.format(cluster_id), file=stderr)
+            print('Built {} diatom_components'.format(cluster_id), file=stderr)
     return clusters
 
 
 def mcl(hits_graph, expand_factor=2, inflate_factor=1.5,
         max_loop=10, mult_factor=1):
     """
-    Return clusters in hits graph as detected by MCL clustering algorithm
+    Return diatom_components in hits graph as detected by MCL clustering algorithm
     Basically a wrapper around python_mcl's mcl function that allows to use
     hits graph instead of a matrix
     :param hits_graph: list of hit sets
@@ -100,7 +100,7 @@ def mcl(hits_graph, expand_factor=2, inflate_factor=1.5,
 
 def red(hits_graph, l):
     """
-    Reduce the graph and produce clusters in the reduced one
+    Reduce the graph and produce diatom_components in the reduced one
     :param hits_graph:
     :param l:
     :return:
@@ -113,7 +113,7 @@ parser.add_argument('-b', type=str, help='BLAST tabular file')
 parser.add_argument('-e', type=float, help='e-value cutoff. Default 1e-5',
                     default=1e-5)
 parser.add_argument('-n', type=str, help='Base name for output files',
-                    default='clusters')
+                    default='diatom_components')
 parser.add_argument('-v', action='store_true', help='Produce STDERR output')
 parser.add_argument('-c', type=int, help='Debug lines frequency. Works only with slc clustering',
                     default=10000)
@@ -162,14 +162,14 @@ elif args.a == 'red':
 
 
 
-# Writing clusters
-with open('{}.clusters.list'.format(args.n), mode='w') as cluster_file:
+# Writing diatom_components
+with open('{}.diatom_components.list'.format(args.n), mode='w') as cluster_file:
     for a in range(len(clusters)):
         print(a, clusters[a], file=cluster_file)
 
-#  Writing cluster data
+#  Writing diatom_cluster data
 if args.v:
-    print('Calculating cluster lengths distribution', file=stderr)
+    print('Calculating diatom_cluster lengths distribution', file=stderr)
 with open('{}.cluster_sizes'.format(args.n), mode='w') as data_file:
     lengths = [len(x) for x in clusters]
     lengths.sort()

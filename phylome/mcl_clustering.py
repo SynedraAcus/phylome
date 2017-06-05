@@ -185,7 +185,7 @@ if __name__ == '__main__':
 
     print(" number of nodes: %s\n" % M.shape[0])
 
-    print("{}: {}".format(time.time(), "evaluating clusters..."))
+    print("{}: {}".format(time.time(), "evaluating diatom_components..."))
     M, clusters = networkx_mcl(G, expand_factor=options.expand_factor,
                                inflate_factor=options.inflate_factor,
                                max_loop=options.max_loop,
