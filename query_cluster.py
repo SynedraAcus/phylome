@@ -1,12 +1,13 @@
 #! /usr/bin/env python3
 
 """
-This script diatom_components the sequences using seed species. While not particularly
+This script clusters the sequences using seed species. While not particularly
 great, this method at least definitely works. The idea is to do the following:
 1. Group all the homologous sequences within the query species (whether 
 inparalogs, outparalogs, whatever).
 2. For each group, select all the diatom sequences that are hits to it above the
 e-value cutoff.
+NOTE: due to BLAST being all-against-all, step 1 happens automatically
 3. For each of *those* select reference sequences. Either top-100 or all above
 the e-value cutoff, whichever set is smaller.
 4. Reduce the set of reference sequences (probably megataxa-optimised reduction)
@@ -45,6 +46,7 @@ for blast_hit in parse_blast_file_to_hits(args.nr_blast):
             nr_components[index].add(blast_hit.hit_id)
 
 clusters = [x.union(y) for x, y in zip(diatom_components, nr_components)]
+#  Here for debugging purposes, later here'll be a proper reducer
 with open(args.o, mode='w') as outfile:
     for cluster in clusters:
         print(cluster, file=outfile)
