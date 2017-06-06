@@ -30,7 +30,7 @@ parser.add_argument('-nr_evalue', type=float,
 args = parser.parse_args()
 
 diatom_components = []
-queries = list
+queries = []
 for record in SeqIO.parse(args.f, 'fasta'):
     queries.append(record.id)
     diatom_components.append(set([record.id]))
