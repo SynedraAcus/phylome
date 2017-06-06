@@ -14,6 +14,7 @@ the e-value cutoff, whichever set is smaller.
 5. Prepare the results in a dir or something.
 """
 
+import sys
 from argparse import ArgumentParser
 from Bio import SeqIO
 from phylome.blast_parser import parse_blast_file_to_hits
@@ -29,28 +30,44 @@ parser.add_argument('-nr_evalue', type=float,
                     help='nr e-value cutoff')
 args = parser.parse_args()
 
-diatom_components = []
-queries = []
+diatom_components = {}
 for record in SeqIO.parse(args.f, 'fasta'):
-    queries.append(record.id)
-    diatom_components.append(set([record.id]))
+    diatom_components[record.id] = set([record.id])
 
-for blast_hit in parse_blast_file_to_hits(args.dia_blast):
-    if min(x.evalue for x in blast_hit.hsps) <= args.dia_evalue:
-        for query, cluster in zip(queries, diatom_components):
-            if query == blast_hit.query_id:
-                cluster.add(blast_hit.hit_id)
-                break
+# for blast_hit in parse_blast_file_to_hits(args.dia_blast):
+#     if min(x.evalue for x in blast_hit.hsps) <= args.dia_evalue:
+#         for query, cluster in zip(queries, diatom_components):
+#             if query == blast_hit.query_id:
+#                 cluster.add(blast_hit.hit_id)
+#                 break
+for blast_line in open(args.dia_blast):
+    arr = blast_line.split('\t')
+    if float(arr[10]) <= args.dia_evalue:
+        if arr[0] in diatom_components.keys():
+            diatom_components[arr[0]].add(arr[1])
+print('Diatom clusters built', file=sys.stderr)
+with open('{}.diatom'.format(args.o)) as tmp:
+    print(diatom_components, file=tmp)
 
-nr_components = [set() for x in diatom_components]
-for blast_hit in parse_blast_file_to_hits(args.nr_blast):
-    for index, diatom_cluster in enumerate(diatom_components):
-        if blast_hit.query_id in diatom_cluster and \
-                min(x.evalue for x in blast_hit.hsps) <= args.nr_evalue:
-            nr_components[index].add(blast_hit.hit_id)
+nr_components = {x: set() for x in diatom_components.keys()}
 
-clusters = [x.union(y) for x, y in zip(diatom_components, nr_components)]
-#  Here for debugging purposes, later here'll be a proper reducer
-with open(args.o, mode='w') as outfile:
-    for cluster in clusters:
-        print(cluster, file=outfile)
+for blast_line in open(args.nr_blast):
+    arr = blast_line.split('\t')
+    for valid_cluster in (x for x in nr_components.keys\
+                          if arr[0] in diatom_components[x]):
+        nr_components[valid_cluster].add(arr[1])
+print('NR clusters built', file=sys.stderr)
+with open('{}.nr'.format(args.o)) as tmp:
+    print(nr_components, file=tmp)
+# nr_components = [set() for x in diatom_components]
+# for blast_hit in parse_blast_file_to_hits(args.nr_blast):
+#     for index, diatom_cluster in enumerate(diatom_components):
+#         if blast_hit.query_id in diatom_cluster and \
+#                 min(x.evalue for x in blast_hit.hsps) <= args.nr_evalue:
+#             nr_components[index].add(blast_hit.hit_id)
+#
+# clusters = [x.union(y) for x, y in zip(diatom_components, nr_components)]
+# #  Here for debugging purposes, later here'll be a proper reducer
+# with open(args.o, mode='w') as outfile:
+#     for cluster in clusters:
+#         print(cluster, file=outfile)
