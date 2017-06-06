@@ -30,13 +30,17 @@ parser.add_argument('-nr_evalue', type=float,
 args = parser.parse_args()
 
 diatom_components = []
+queries = list
 for record in SeqIO.parse(args.f, 'fasta'):
-    diatom_ids = set()
-    for blast_hit in parse_blast_file_to_hits(args.dia_blast):
-        if blast_hit.query_id == record.id and \
-                min(x.evalue for x in blast_hit.hsps) <= args.dia_evalue:
-            diatom_ids.add(blast_hit.hit_id)
-    diatom_components.append(diatom_ids)
+    queries.append(record.id)
+    diatom_components.append(set([record.id]))
+
+for blast_hit in parse_blast_file_to_hits(args.dia_blast):
+    if min(x.evalue for x in blast_hit.hsps) <= args.dia_evalue:
+        for query, cluster in zip(queries, diatom_components):
+            if query == blast_hit.query_id:
+                cluster.add(blast_hit.hit_id)
+                break
 
 nr_components = [set() for x in diatom_components]
 for blast_hit in parse_blast_file_to_hits(args.nr_blast):
