@@ -46,7 +46,7 @@ for blast_line in open(args.dia_blast):
         if arr[0] in diatom_components.keys():
             diatom_components[arr[0]].add(arr[1])
 print('Diatom clusters built', file=sys.stderr)
-with open('{}.diatom'.format(args.o)) as tmp:
+with open('{}.diatom'.format(args.o), mode='w') as tmp:
     print(diatom_components, file=tmp)
 
 nr_components = {x: set() for x in diatom_components.keys()}
@@ -57,7 +57,7 @@ for blast_line in open(args.nr_blast):
                           if arr[0] in diatom_components[x]):
         nr_components[valid_cluster].add(arr[1])
 print('NR clusters built', file=sys.stderr)
-with open('{}.nr'.format(args.o)) as tmp:
+with open('{}.nr'.format(args.o), mode='w') as tmp:
     print(nr_components, file=tmp)
 # nr_components = [set() for x in diatom_components]
 # for blast_hit in parse_blast_file_to_hits(args.nr_blast):
