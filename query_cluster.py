@@ -53,7 +53,7 @@ nr_components = {x: set() for x in diatom_components.keys()}
 
 for blast_line in open(args.nr_blast):
     arr = blast_line.split('\t')
-    for valid_cluster in (x for x in nr_components.keys\
+    for valid_cluster in (x for x in nr_components.keys()\
                           if arr[0] in diatom_components[x]):
         nr_components[valid_cluster].add(arr[1])
 print('NR clusters built', file=sys.stderr)

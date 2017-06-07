@@ -72,7 +72,7 @@ def get_supertaxon_from_list(taxon, taxa_list, cursor):
     Accepts a taxon id and a list of taxon ids. If one of the taxa in the list
     is a supertaxon of the query taxon, returns the id of that one. If neither
     is, ie the function has descended to the root without hitting one of the
-    query taxa, raises ValueError.
+    query taxa, returns None.
     If taxa in taxa_list are nested, the one nearest to the query taxon is
     returned.
     :param taxon:
@@ -83,4 +83,4 @@ def get_supertaxon_from_list(taxon, taxa_list, cursor):
     for supertaxon in descend_taxon_tree(taxon, cursor):
         if supertaxon in taxa_list:
             return supertaxon
-    raise ValueError('Neither taxon is a supertaxon of a query')
+    return None
