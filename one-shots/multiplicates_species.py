@@ -1,4 +1,4 @@
-#! /usr/bin/python3
+#! /usr/bin/env python3
 
 from argparse import ArgumentParser
 from Bio import SeqIO
@@ -18,4 +18,4 @@ counts = {x: 0 for x in species_uniq}
 for record in SeqIO.parse(args.f, format='fasta'):
     counts[species[record.id]] += 1
 for a in counts.keys():
-    print('\t'.join((a, counts[a])))
+    print('\t'.join((a, str(counts[a]))))
