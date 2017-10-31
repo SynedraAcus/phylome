@@ -41,6 +41,7 @@ for fasta_file in args.f:
                 int(100*accepted_record_count/record_count), fasta_file
             ))
             sys.stderr.flush()
+        output_handle.flush()
         if args.i:
             shutil.copy(output_handle.name, fasta_file)
         else:
