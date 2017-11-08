@@ -35,6 +35,8 @@ parser.add_argument('-c', type=float, default=0.5,
                     help='Duplicate hit percentage. Default 0.5')
 parser.add_argument('-n', type=str, default='multiples',
                     help='Output filename')
+parser.add_argument('-s', action='store_true',
+        help='Print species statistics. Assumes FASTA headers to be species|ID')
 args = parser.parse_args()
 
 if not args.b:
@@ -46,14 +48,36 @@ for query_group in iterate_by_query(parse_blast_file_to_hits(filename=args.b)):
     if duplicate_percentage(query_group, overlap_cutoff=args.o,
                             len_cutoff=args.l) >= args.c:
         duplicates.add(query_group[0].query_id)
-print('Found {} duplicates'.format(len(duplicates)), file=stderr)
+print('Found {} duplicates'.format(len(duplicates)), file=stderr, flush=True)
 if duplicates:
+    species_mult = {}
     with open('{}.duplicate_list'.format(args.n), mode='w') as duplicate_list:
         for a in duplicates:
             print(a, file=duplicate_list)
-    print('Generating FASTA...', file=stderr)
+            if args.s:
+                species = a.split('|')[0]
+                try:
+                    species_mult[species] += 1
+                except KeyError:
+                    species_mult[species] = 1
+    print('Generating FASTA...', file=stderr, flush=True)
+    species_total = {}
     if args.f:
         with open('{}.duplicates.fasta'.format(args.n), mode='w') as outfasta:
             for record in SeqIO.parse(args.f, 'fasta'):
                 if record.id in duplicates:
                     SeqIO.write(record, outfasta, 'fasta')
+                if args.s:
+                    species = record.id.split('|')[0]
+                    try:
+                        species_total[species] += 1
+                    except KeyError:
+                        species_total[species] = 1
+
+if args.s:
+    with open('{}.statistics.tsv'.format(args.n), mode='w') as stat_file:
+        for species in sorted(species_total.keys()):
+            print('\t'.join([species, species_total[species],
+                             species_mult[species],
+                             species_mult[species]/species_total[species]*100]),
+                  file=stat_file)
