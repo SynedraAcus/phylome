@@ -80,5 +80,5 @@ if args.s:
             print('\t'.join([species,
                      str(species_total[species]),
                      str(species_mult[species]),
-                     str(species_mult[species]/species_total[species]*100])),
+                     str(species_mult[species]/species_total[species]*100)]),
                   file=stat_file)
