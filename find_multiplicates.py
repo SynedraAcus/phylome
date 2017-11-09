@@ -77,7 +77,8 @@ if duplicates:
 if args.s:
     with open('{}.statistics.tsv'.format(args.n), mode='w') as stat_file:
         for species in sorted(species_total.keys()):
-            print('\t'.join([species, species_total[species],
-                             species_mult[species],
-                             species_mult[species]/species_total[species]*100]),
+            print('\t'.join([species,
+                     str(species_total[species]),
+                     str(species_mult[species]),
+                     str(species_mult[species]/species_total[species]*100])),
                   file=stat_file)
