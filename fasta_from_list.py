@@ -76,6 +76,8 @@ for cluster_batch in batches(clusters, args.batch):
         for index, cluster in cluster_batch.items():
             if record.id in cluster:
                 SeqIO.write(record, diatom_filehandles[index], 'fasta')
+    for handle in diatom_filehandles.values():
+        handle.close()
     print('Written a batch', file=sys.stderr, flush=True)
 
 if not args.b:
@@ -102,4 +104,6 @@ for batch in batches(other_seqs, args.batch):
         for cluster_id, cluster in batch.items():
             if record.id in cluster:
                 SeqIO.write(record, external_filehandles[cluster_id])
+    for handle in external_filehandles.values():
+        handle.close()
 print('Done', flush=True, file=sys.stderr)
