@@ -5,10 +5,6 @@ numpy to work.
 
 ### Scripts
 
-#### cluster_diatoms.py
-Clusters potentially homologous sequences based on BLAST output. The
-algorithm is approximately similar to that of COG
-
 #### find_multiplicates.py
 Takes a BLAST TSV file and (optionally) a multiFASTA. Returns IDs and
 (if the FASTA is available) sequences of the multiplicated genes using
