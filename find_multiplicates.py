@@ -77,6 +77,8 @@ if duplicates:
 if args.s:
     with open('{}.statistics.tsv'.format(args.n), mode='w') as stat_file:
         for species in sorted(species_total.keys()):
+            if species not in species_mult.keys():
+                species_mult[species] = 0
             print('\t'.join([species,
                      str(species_total[species]),
                      str(species_mult[species]),
