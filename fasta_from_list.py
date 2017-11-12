@@ -61,7 +61,7 @@ if not args.b:
     
 # Assembling BLAST hit lists
 print('Parsing BLAST file {}'.format(args.b), flush=True, file=sys.stderr)
-other_seqs = [{} for x in clusters]
+other_seqs = [set() for x in clusters]
 external_handles = [open('{0}/{1}{2}.external.fasta'.format(args.d,
                                                             args.o,
                                                             counter),
