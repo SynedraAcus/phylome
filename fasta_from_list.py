@@ -97,9 +97,6 @@ for hit in parse_blast_file_to_hits(args.b):
     if hit.query_id in cluster_mappings and \
                     min((x.evalue for x in hit.hsps)) < args.evalue:
         other_seqs[cluster_mappings[hit.query_id]] = hit.hit_id
-    for cluster_id, cluster in clusters.items():
-        if hit.query_id in cluster:
-            other_seqs[cluster_id].add(hit.hit_id)
 
 print('Parsing external FASTA {}'.format(args.db), flush=True, file=sys.stderr)
 # Sequences absent from the FASTA, but present in BLAST, are silently ignored
