@@ -109,7 +109,7 @@ for batch in batches(other_seqs, args.batch):
     for record in SeqIO.parse(args.db, 'fasta'):
         for cluster_id, cluster in batch.items():
             if record.id in cluster:
-                SeqIO.write(record, external_filehandles[cluster_id])
+                SeqIO.write(record, external_filehandles[cluster_id], 'fasta')
     for handle in external_filehandles.values():
         handle.close()
 print('Done', flush=True, file=sys.stderr)
