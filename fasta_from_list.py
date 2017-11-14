@@ -53,6 +53,7 @@ args = parser.parse_args()
 
 clusters = {}
 counter = 0
+cluster_mappings = {}
 os.mkdir(args.d)
 # Assumes list to consist of tab-separated ID lists, one cluster in each line
 print('Loading clusters from {}'.format(args.l), flush=True, file=sys.stderr)
@@ -61,24 +62,29 @@ for line in open(args.l):
     species = len({x.split('|')[0] for x in ids})
     if args.min <= len(ids) <= args.max and species >= args.min_species:
         clusters[counter] = set(ids)
+        for seqid in ids:
+            cluster_mappings[seqid] = counter
         counter += 1
 print('Loaded {} clusters'.format(counter), flush=True, file=sys.stderr)
 
-print('Loading diatom FASTAs', flush=True, file=sys.stderr)
-for cluster_batch in batches(clusters, args.batch):
-    # Creating output filehandles
-    diatom_filehandles = {x: open('{0}/{1}{2}.diatoms.fasta'.format(args.d,
-                                                                    args.o,
-                                                                    x),
-                                  mode='w+')
-                          for x in cluster_batch.keys()}
-    for record in SeqIO.parse(args.f, 'fasta'):
-        for index, cluster in cluster_batch.items():
-            if record.id in cluster:
-                SeqIO.write(record, diatom_filehandles[index], 'fasta')
-    for handle in diatom_filehandles.values():
-        handle.close()
-    print('Written a batch', file=sys.stderr, flush=True)
+if args.f:
+    # This part can be safely skipped if no FASTA is supplied
+    print('Loading diatom FASTAs in batches of {}'.format(args.batch),
+          flush=True, file=sys.stderr)
+    for cluster_batch in batches(clusters, args.batch):
+        # Creating output filehandles
+        diatom_filehandles = {x: open('{0}/{1}{2}.diatoms.fasta'.format(args.d,
+                                                                        args.o,
+                                                                        x),
+                                      mode='w+')
+                              for x in cluster_batch.keys()}
+        for record in SeqIO.parse(args.f, 'fasta'):
+            for index, cluster in cluster_batch.items():
+                if record.id in cluster:
+                    SeqIO.write(record, diatom_filehandles[index], 'fasta')
+        for handle in diatom_filehandles.values():
+            handle.close()
+        print('Written a batch', file=sys.stderr, flush=True)
 
 if not args.b:
     # No external sequences
@@ -88,6 +94,9 @@ if not args.b:
 print('Parsing BLAST file {}'.format(args.b), flush=True, file=sys.stderr)
 other_seqs = {x: set() for x in clusters.keys()}
 for hit in parse_blast_file_to_hits(args.b):
+    if hit.query_id in cluster_mappings and \
+                    min((x.evalue for x in hit.hsps)) < args.evalue:
+        other_seqs[cluster_mappings[hit.query_id]] = hit.hit_id
     for cluster_id, cluster in clusters.items():
         if hit.query_id in cluster:
             other_seqs[cluster_id].add(hit.hit_id)
