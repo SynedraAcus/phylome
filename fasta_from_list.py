@@ -111,9 +111,8 @@ for batch in batches(other_seqs, args.batch):
         for item in cluster:
             cluster_cache[item] = cluster_id
     for record in SeqIO.parse(args.db, 'fasta'):
-        for cluster_id, cluster in batch.items():
-            if record.id in cluster_cache:
-                SeqIO.write(record, external_filehandles[cluster_cache[record.id]], 'fasta')
+        if record.id in cluster_cache:
+            SeqIO.write(record, external_filehandles[cluster_cache[record.id]], 'fasta')
     for handle in external_filehandles.values():
         handle.close()
     print('Loaded a batch', file=sys.stderr, flush=True)
