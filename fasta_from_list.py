@@ -96,7 +96,7 @@ other_seqs = {x: set() for x in clusters.keys()}
 for hit in parse_blast_file_to_hits(args.b):
     if hit.query_id in cluster_mappings and \
                     min((x.evalue for x in hit.hsps)) < args.evalue:
-        other_seqs[cluster_mappings[hit.query_id]] = hit.hit_id
+        other_seqs[cluster_mappings[hit.query_id]].add(hit.hit_id)
 
 print('Parsing external FASTA {}'.format(args.db), flush=True, file=sys.stderr)
 # Sequences absent from the FASTA, but present in BLAST, are silently ignored
@@ -107,9 +107,11 @@ for batch in batches(other_seqs, args.batch):
                                     mode='w+')
                           for x in batch.keys()}
     cluster_cache = {}
-    for cluster_id, cluster in batch.items:
+    for cluster_id, cluster in batch.items():
         for item in cluster:
             cluster_cache[item] = cluster_id
+    print('Batch size {} seqs'.format(len(cluster_cache)), file=sys.stderr,
+          flush=True)
     for record in SeqIO.parse(args.db, 'fasta'):
         if record.id in cluster_cache:
             SeqIO.write(record, external_filehandles[cluster_cache[record.id]], 'fasta')
