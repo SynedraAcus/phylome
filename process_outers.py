@@ -11,7 +11,6 @@
 
 
 from argparse import ArgumentParser
-from functools import partial
 from multiprocessing import Pool
 
 def process_fasta(filename, host='127.0.0.1', username='root',
@@ -21,8 +20,8 @@ def process_fasta(filename, host='127.0.0.1', username='root',
     Process a single FASTA file. Returns a log line
     Log consists of filename, counts of all nonreduced (in the order in which
     they are in the kwarg) and the count of non-excluded, non-nonreduced seqs
-    :param filename: 
-    :return: 
+    :param filename:
+    :return:
     """
     # These are gonna be multiprocessed and each process will import
     # independently anyway.
@@ -88,10 +87,23 @@ parser.add_argument('-d', type=str, help='Database name', default='biosql')
 parser.add_argument('-t', type=int, help='Process number', default=2)
 args = parser.parse_args()
 
-process_partial = partial(process_fasta, host=args.o, username=args.u,
-                          database=args.d, password=args.p)
+# process_partial = partial(process_fasta, host=args.o, username=args.u,
+#                           database=args.d, password=args.p)
+
+
+def wrapper(fasta_file):
+    """
+    A poor man's partial
+    :param fasta_file:
+    :return:
+    """
+    global args
+    return process_fasta(fasta_file, host=args.o, username=args.u,
+                         password=args.p, database=args.d)
+
+
 with Pool(processes=args.t) as pool:
-    results = pool.map(process_fasta, args.f)
+    results = pool.map(wrapper, args.f)
 with open(args.l, mode='w') as output_file:
     for x in results:
         print(x, file=output_file)
