@@ -24,7 +24,7 @@ def descend_taxon_tree(starting_taxon, cursor):
                    .format(starting_taxon))
     mysql_answer = cursor.fetchall()
     if not mysql_answer:
-        raise ValueError('Invalid NCBI taxon id')
+        raise ValueError('Invalid NCBI taxon id {}'.format(starting_taxon))
     mysql_id = mysql_answer[0][0]
     while True:
         cursor.execute('SELECT `parent_taxon_id` FROM taxon WHERE `taxon_id`={0};'
