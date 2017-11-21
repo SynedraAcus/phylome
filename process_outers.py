@@ -11,7 +11,8 @@
 
 
 from argparse import ArgumentParser
-
+from functools import partial
+from multiprocessing import Pool
 
 def process_fasta(filename, host='127.0.0.1', username='root',
                   password='password', database='biosql',
@@ -80,11 +81,17 @@ parser = ArgumentParser('Process outers FASTA(s). Clades are hardcoded')
 parser.add_argument('-f', nargs='*', type=str,
                     help='FASTA file(s)')
 parser.add_argument('-l', type=str, help='log file')
-parser.add_argument('-o', type=str, help='MySQL host')
-parser.add_argument('-u', type=str, help='MySQL username')
-parser.add_argument('-p', type=str, help='MySQL password')
+parser.add_argument('-o', type=str, help='MySQL host', default='127.0.0.1')
+parser.add_argument('-u', type=str, help='MySQL username', default='root')
+parser.add_argument('-p', type=str, help='MySQL password', default='password')
+parser.add_argument('-d', type=str, help='Database name', default='biosql')
 parser.add_argument('-t', type=int, help='Process number', default=2)
 args = parser.parse_args()
 
-for fasta_file in args.f:
-    print(process_fasta(fasta_file))
+process_partial = partial(process_fasta, host=args.o, username=args.u,
+                          database=args.d, password=args.p)
+with Pool(processes=args.t) as pool:
+    results = pool.map(process_fasta, args.f)
+with open(args.l) as output_file:
+    for x in results:
+        print(x, file=args.l)
