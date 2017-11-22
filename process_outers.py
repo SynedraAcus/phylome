@@ -12,6 +12,7 @@
 
 from argparse import ArgumentParser
 from multiprocessing import Pool
+import sys
 
 def process_fasta(filename, host='127.0.0.1', username='root',
                   password='password', database='biosql',
@@ -29,6 +30,9 @@ def process_fasta(filename, host='127.0.0.1', username='root',
     from phylome.taxonomy import get_supertaxon_from_list
     import mysql.connector
     records = {x.id.split('.')[0]: x for x in SeqIO.parse(filename, 'fasta')}
+    if len(records) == 0:
+        # A quick-and-dirty wrap around empty fasta case
+        return '{}\t0\t0\t0\t0'.format(filename)
     cnx = mysql.connector.connect(user=username, host=host, password=password,
                                   database=database)
     cursor = cnx.cursor()
@@ -84,7 +88,7 @@ parser.add_argument('-o', type=str, help='MySQL host')
 parser.add_argument('-u', type=str, help='MySQL username', default='root')
 parser.add_argument('-p', type=str, help='MySQL password', default='password')
 parser.add_argument('-d', type=str, help='Database name', default='biosql')
-parser.add_argument('-t', type=int, help='Process number', default=2)
+parser.add_argument('-t', type=int, help='Process number', default=1)
 args = parser.parse_args()
 
 # process_partial = partial(process_fasta, host=args.o, username=args.u,
@@ -101,9 +105,15 @@ def wrapper(fasta_file):
     return process_fasta(fasta_file, host=args.o, username=args.u,
                          password=args.p, database=args.d)
 
-
-with Pool(processes=args.t) as pool:
-    results = pool.map(wrapper, args.f)
+if args.t > 1:
+    with Pool(processes=args.t) as pool:
+        results = pool.map(wrapper, args.f)
+else:
+    results = []
+    for fasta in args.f:
+        r = wrapper(fasta)
+        results.append(r)
+        print(r, file=sys.stderr, flush=True)
 with open(args.l, mode='w') as output_file:
     for x in results:
         print(x, file=output_file)
