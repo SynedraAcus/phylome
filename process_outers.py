@@ -9,7 +9,6 @@
 #
 # Also some spam in sys.stderr
 
-
 from argparse import ArgumentParser
 from multiprocessing import Pool
 import sys
@@ -28,12 +27,12 @@ def process_fasta(filename, host='127.0.0.1', username='root',
     # independently anyway.
     from Bio import SeqIO
     from phylome.taxonomy import get_supertaxon_from_list
-    import mysql.connector
+    import pymysql
     records = {x.id.split('.')[0]: x for x in SeqIO.parse(filename, 'fasta')}
     if len(records) == 0:
         # A quick-and-dirty wrap around empty fasta case
         return '{}\t0\t0\t0\t0'.format(filename)
-    cnx = mysql.connector.connect(user=username, host=host, password=password,
+    cnx = pymysql.connect(user=username, host=host, password=password,
                                   database=database)
     cursor = cnx.cursor()
     # In a separate variable solely for the readability
