@@ -30,11 +30,11 @@ diatom_mask = '/home/amorozov/phylome_data/clustering/groups/{}.diatoms.fasta'
 # These should be checked first at {}.reduced, then, if that failed, at just
 # mask
 red_mask = '/home/amorozov/phylome_data/clustering/outers/{}.external.fasta.2763'
-green_mask = '/home/amorozov/phylome_data/clustering/groups/{}.external.fasta.33090'
-rest_mask = '/home/amorozov/phylome_data/clustering/groups/{}.external.fasta.rest'
+green_mask = '/home/amorozov/phylome_data/clustering/outers/{}.external.fasta.33090'
+rest_mask = '/home/amorozov/phylome_data/clustering/outers/{}.external.fasta.rest'
 if not os.path.isdir(args.d):
     os.mkdir(args.d)
-for line in args.l:
+for line in open(args.l):
     cluster_id = line.rstrip()
     with open(os.path.join(args.d, '{}.taxdata.tsv'.format(cluster_id)),
               mode='w') as outhandle:
@@ -46,11 +46,11 @@ for line in args.l:
         if red_path:
             for record in SeqIO.parse(red_path, 'fasta'):
                 print('{}\tred'.format(record.id), file=outhandle)
-        green_path = get_path(green_mask)
+        green_path = get_path(green_mask, cluster_id)
         if green_path:
             for record in SeqIO.parse(green_path, 'fasta'):
                 print('{}\tgreen'.format(record.id), file=outhandle)
-        rest_path = get_path(rest_mask)
+        rest_path = get_path(rest_mask, cluster_id)
         if rest_path:
             for record in SeqIO.parse(rest_path, 'fasta'):
                 print('{}\trest'.format(record.id), file=outhandle)
