@@ -7,6 +7,7 @@ import dendropy
 parser = ArgumentParser('Find red-supporting or green-supporting trees')
 parser.add_argument('-n', type=str, help='Cluster names file')
 parser.add_argument('-k', type=float, help='Taxa represenation', default=0.05)
+parser.add_argument('-s', action='store_true', help='Run sister analysis')
 args = parser.parse_args()
 
 
@@ -50,35 +51,66 @@ def get_tree_class(tree, k):
     global groups
     # Root node stats are tree stats
     counts = {x: tree.seed_node.annotations[x].value for x in groups}
-    # Maximum available in alien clades
-    maxes = {x: round(counts[x]*k) for x in counts}
     # Minimum necessary for a clade
     mins = {x: counts[x] - round(counts[x]*k) for x in counts}
-    for node in tree.preorder_node_iter():
+    for node in tree.postorder_node_iter():
         if node.annotations['red'].value >= mins['red'] and \
                 node.annotations['diatom'].value >= mins['diatom'] and \
-                node.annotations['green'].value <= maxes['green'] and \
-                node.annotations['rest'].value <= maxes['rest']:
+                node.annotations['green'].value <= mins['green'] and \
+                node.annotations['rest'].value <= mins['rest']:
             return 'red'
         elif node.annotations['green'].value >= mins['green'] and \
-                node.annotations['diatom'].value >= mins['diatom'] and \
-                node.annotations['red'].value <= maxes['red'] and \
-                node.annotations['rest'].value <= maxes['rest']:
+               node.annotations['diatom'].value >= mins['diatom'] and \
+               node.annotations['red'].value <= mins['red'] and \
+               node.annotations['rest'].value <= mins['rest']:
             return 'green'
         elif node.annotations['rest'].value >= mins['rest'] and \
                 node.annotations['diatom'].value >= mins['diatom'] and \
-                node.annotations['green'].value <= maxes['green'] and \
-                node.annotations['red'].value <= maxes['red']:
+                node.annotations['green'].value <= mins['green'] and \
+                node.annotations['red'].value <= mins['red']:
             return 'rest'
     else:
         return 'neither'
     
+def sister_analysis(tree):
+    """
+    For every diatom-only clade sister to nondiatoms,
+    who precisely is it sister to?
+    """
+    global groups
+    node_counts = {x:0 for x in groups}
+    totals = {x: tree.seed_node.annotations[x].value for x in groups}
+    for node in tree.postorder_internal_node_iter():
+        sis = None
+        weight = None
+        for child in node.child_node_iter():
+            if child.annotations['diatom'].value == 0:
+                # This is a nondiatom node
+                # sis can be harmlessly overwritten if a diatom node is not encountered
+                sis = {x: child.annotations[x].value for x in groups}
+            elif all([child.annotations[x].value == 0 for x in ('red', 'green', 'rest')]):
+                # This is a diatom node
+                weight = child.annotations['diatom'].value/totals['diatom']
+        if sis and weight:
+            nonzeros = [x for x in sis if sis[x] > 0]
+            if len(nonzeros) == 1:
+                node_counts[nonzeros[0]] += weight*(sis[nonzeros[0]]/totals[nonzeros[0]])
+    return node_counts
+                
 
 tree_mask = 'trees/{}.dataset.fasta.dist.tsv.tre'
 taxdata_mask = 'taxdata/{}.taxdata.tsv'
 groups = ('red', 'green', 'rest', 'diatom')
+running_weights = {x: 0 for x in groups}
 for line in open(args.n):
     cluster_id = line.rstrip()
     tree = dendropy.Tree.get(path=tree_mask.format(cluster_id), schema='newick')
     paint_tree(tree, taxdata_mask.format(cluster_id))
-    print(get_tree_class(tree, args.k))
+    if args.s:
+        c = sister_analysis(tree)
+        for x in groups:
+            running_weights[x] += c[x]
+    else:
+        print(get_tree_class(tree, args.k))
+if args.s:
+    print(running_weights)
