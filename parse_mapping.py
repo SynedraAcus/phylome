@@ -99,7 +99,7 @@ drawing.add(barycentric_polygon([Point(None, None, 1, 0, 0),
                                  percentage_color(summary[0]), triangle))
 text_point = Point(None, None, 5/6, 1/12, 1/12)
 barycentric_to_euclidean(text_point, triangle)
-drawing.add(svgwrite.text.Text(str(summary[0]) + ' %',
+drawing.add(svgwrite.text.Text('{0:.2}'.format(str(summary[0])) + ' %',
                                insert=(text_point.x, text_point.y),
                                font_size=20, text_anchor='middle'))
 # Segment 2
@@ -110,7 +110,7 @@ drawing.add(barycentric_polygon([Point(None, None, 1/6, 2/3, 1/6),
                                  percentage_color(summary[1]), triangle))
 text_point = Point(None, None, 1/12, 5/6, 1/12)
 barycentric_to_euclidean(text_point, triangle)
-drawing.add(svgwrite.text.Text(str(summary[1]) + ' %',
+drawing.add(svgwrite.text.Text('{0:.2}'.format(summary[1]) + ' %',
                                insert=(text_point.x, text_point.y),
                                font_size=20, text_anchor='middle'))
 
@@ -122,7 +122,7 @@ drawing.add(barycentric_polygon([Point(None, None, 1/4, 0, 3/4),
                                 percentage_color(summary[2]), triangle))
 text_point = Point(None, None, 1/12, 1/12, 5/6)
 barycentric_to_euclidean(text_point, triangle)
-drawing.add(svgwrite.text.Text(str(summary[2]) + ' %',
+drawing.add(svgwrite.text.Text('{0:.2}'.format(summary[2]) + ' %',
                                insert=(text_point.x, text_point.y),
                                font_size=20, text_anchor='middle'))
 
@@ -134,7 +134,7 @@ drawing.add(barycentric_polygon([Point(None, None, 3/4, 1/4, 0),
                                 percentage_color(summary[3]), triangle))
 text_point = Point(None, None, 11/24, 11/24, 1/12)
 barycentric_to_euclidean(text_point, triangle)
-drawing.add(svgwrite.text.Text(str(summary[3]) + ' %',
+drawing.add(svgwrite.text.Text('{0:.2}'.format(summary[3]) + ' %',
                                insert=(text_point.x, text_point.y),
                                font_size=20, text_anchor='middle'))
 
@@ -146,7 +146,7 @@ drawing.add(barycentric_polygon([Point(None, None, 1/6, 2/3, 1/6),
                                 percentage_color(summary[4]), triangle))
 text_point = Point(None, None, 1/12, 11/24, 11/24)
 barycentric_to_euclidean(text_point, triangle)
-drawing.add(svgwrite.text.Text(str(summary[4]) + ' %',
+drawing.add(svgwrite.text.Text('{0:.2}'.format(summary[4]) + ' %',
                                insert=(text_point.x, text_point.y),
                                font_size=20, text_anchor='middle'))
 
@@ -158,7 +158,7 @@ drawing.add(barycentric_polygon([Point(None, None, 3/4, 0, 1/4),
                                 percentage_color(summary[5]), triangle))
 text_point = Point(None, None, 11/24, 1/12, 11/24)
 barycentric_to_euclidean(text_point, triangle)
-drawing.add(svgwrite.text.Text(str(summary[5]) + ' %',
+drawing.add(svgwrite.text.Text('{0:.2}'.format(summary[5]) + ' %',
                                insert=(text_point.x, text_point.y),
                                font_size=20, text_anchor='middle'))
 
@@ -169,7 +169,7 @@ drawing.add(barycentric_polygon([Point(None, None, 2/3, 1/6, 1/6),
                                 percentage_color(summary[6]), triangle))
 text_point = Point(None, None, 1/3, 1/3, 1/3)
 barycentric_to_euclidean(text_point, triangle)
-drawing.add(svgwrite.text.Text(str(summary[6]) + ' %',
+drawing.add(svgwrite.text.Text('{0:.2}'.format(summary[6]) + ' %',
                                insert=(text_point.x, text_point.y),
                                font_size=20, text_anchor='middle'))
 
