@@ -13,6 +13,5 @@ if not os.path.isdir(args.d):
     raise ValueError('Incorrect path')
 alignments = glob(args.d+'/*.aln.fasta')
 for alignment in alignments:
-    print(alignment)
     print(command_mask.format(os.path.abspath(alignment)))
 
