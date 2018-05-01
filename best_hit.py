@@ -43,6 +43,9 @@ for hit_list in iterate_by_query(parse_blast_file_to_hits(filename=args.f)):
             break
         else:
             best['none'].append(hit.hit_id)
+print('Red\t{}\nGreen\t{}\nNone\t{}'.format(len(best['red']),
+                                            len(best['green']),
+                                            len(best['none'])))
 with open(args.f+'.reds', mode='w') as fh:
     for x in best['red']:
         print(x, file=fh)
