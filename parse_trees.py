@@ -8,6 +8,7 @@ parser = ArgumentParser('Find red-supporting or green-supporting trees')
 parser.add_argument('-n', type=str, help='Cluster names file')
 parser.add_argument('-k', type=float, help='Taxa represenation', default=0.05)
 parser.add_argument('-s', action='store_true', help='Run sister analysis')
+parser.add_argument('-c', action='store_true', help='Consider sister size for sister analysis')
 args = parser.parse_args()
 
 
@@ -72,7 +73,7 @@ def get_tree_class(tree, k):
     else:
         return 'neither'
     
-def sister_analysis(tree):
+def sister_analysis(tree, consider_sister):
     """
     For every diatom-only clade sister to nondiatoms,
     who precisely is it sister to?
@@ -94,20 +95,24 @@ def sister_analysis(tree):
         if sis and weight:
             nonzeros = [x for x in sis if sis[x] > 0]
             if len(nonzeros) == 1:
-                node_counts[nonzeros[0]] += weight*(sis[nonzeros[0]]/totals[nonzeros[0]])
+                if consider_sister:
+                    node_counts[nonzeros[0]] += weight*(sis[nonzeros[0]]/totals[nonzeros[0]])
+                else:
+                    node_counts[nonzeros[0]] += weight
     return node_counts
                 
 
-tree_mask = 'trees/{}.dataset.fasta.dist.tsv.tre'
-taxdata_mask = 'taxdata/{}.taxdata.tsv'
+taxdata_mask = 'taxdata/{}.clean.tsv'
+tree_mask = 'ml/{}.dataset.fasta.aln.fasta.treefile'
 groups = ('red', 'green', 'rest', 'diatom')
 running_weights = {x: 0 for x in groups}
 for line in open(args.n):
     cluster_id = line.rstrip()
-    tree = dendropy.Tree.get(path=tree_mask.format(cluster_id), schema='newick')
+    tree = dendropy.Tree.get(path=tree_mask.format(cluster_id),
+                schema='newick', preserve_underscores=True)
     paint_tree(tree, taxdata_mask.format(cluster_id))
     if args.s:
-        c = sister_analysis(tree)
+        c = sister_analysis(tree, args.c)
         for x in groups:
             running_weights[x] += c[x]
     else:
