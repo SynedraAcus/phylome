@@ -45,12 +45,15 @@ for hit_list in iterate_by_query(parse_blast_file_to_hits(filename=args.f)):
             print(hit.query_id, supertaxon)
             if supertaxon == 2166:
                 print(hit.query_id, file=red_handle)
+                red_handle.flush()
                 best['red'].append(hit.query_id)
             elif supertaxon == 33090:
                 best['green'].append(hit.query_id)
                 print(hit.query_id, file=green_handle)
+                green_handle.flush()
         else:
             print(hit.query_id, file=none_handle)
+            none_handle.flush()
     else:
         for hit in l:
             supertaxon = get_supertaxon_from_list(acc2taxid[hit.hit_id.split('.')[0]],
@@ -60,13 +63,16 @@ for hit_list in iterate_by_query(parse_blast_file_to_hits(filename=args.f)):
                 print(hit.query_id, supertaxon)
                 if supertaxon == 2166:
                     print(hit.query_id, file=red_handle)
+                    red_handle.flush()
                     best['red'].append(hit.query_id)
                 elif supertaxon == 33090:
                     best['green'].append(hit.query_id)
                     print(hit.query_id, file=green_handle)
+                    green_handle.flush()
                 break
             else:
                 print(hit.query_id, file=none_handle)
+                none_handle.flush()
 
 print('Red\t{}\nGreen\t{}\nNone\t{}'.format(len(best['red']),
                                             len(best['green']),
