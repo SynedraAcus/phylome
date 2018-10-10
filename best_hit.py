@@ -1,13 +1,31 @@
 #! /usr/bin/env python3
 
+import sys
 from argparse import ArgumentParser
 
 import pymysql
-import sys
 
 from phylome.blast_parser import parse_blast_file_to_hits, iterate_by_query
 from phylome.taxonomy import get_supertaxon_from_list
 
+
+def cached_supertaxon(taxon, supertaxa, cursor, cache={}):
+    """
+    Get supertaxon from a list.
+    Takes a taxon, a list of (potential) supertaxa and a pymysql cursor.
+    If a taxon is a descendant of one of these supertaxa, returns that
+    supertaxon, otherwise returns None.
+    This function is cached and stores all the requests made during this
+    program's run. Assumes that it wouldn't be called with different supertaxa
+    lists during a single run.
+    :return:
+    """
+    if taxon not in cache:
+        cache[taxon] = get_supertaxon_from_list(taxon, supertaxa,
+                                                cursor)
+    return cache[taxon]
+    
+    
 parser = ArgumentParser('Return best Archaeplastida hit')
 parser.add_argument('-f', type=str, help='BLAST TSV file')
 parser.add_argument('-d', type=str, help='mySQL DB name')
@@ -40,11 +58,15 @@ for hit_list in iterate_by_query(parse_blast_file_to_hits(filename=args.f)):
     if args.best:
         hit = l[0]
         try:
-            supertaxon = get_supertaxon_from_list(acc2taxid[hit.hit_id.split('.')[0]],
-                                                  [2166, 33090],
-                                                  cursor)
+            taxon = acc2taxid[hit.hit_id.split('.')[0]]
         except KeyError:
-            print('Unknown ID {}'.format(hit.hit_id), file=sys.stderr)
+            print('Unknown sequence ID {}'.format(hit.hit_id))
+            continue
+        try:
+            supertaxon = cached_supertaxon(taxon, [2166, 33090], cursor)
+        except ValueError:
+            print('Unknown ID {}'.format(taxon), file=sys.stderr)
+            continue
         if supertaxon:
             print(hit.query_id, supertaxon)
             if supertaxon == 2166:
@@ -62,11 +84,15 @@ for hit_list in iterate_by_query(parse_blast_file_to_hits(filename=args.f)):
     else:
         for hit in l:
             try:
-                supertaxon = get_supertaxon_from_list(acc2taxid[hit.hit_id.split('.')[0]],
-                                                      [2166, 33090],
-                                                      cursor)
+                taxon = acc2taxid[hit.hit_id.split('.')[0]]
             except KeyError:
-                print('Unknown ID {}'.format(hit.hit_id), file=sys.stderr)
+                print('Unknown sequence ID {}'.format(hit.hit_id))
+                continue
+            try:
+                supertaxon = cached_supertaxon(taxon, [2166, 33090], cursor)
+            except ValueError:
+                print('Unknown ID {}'.format(taxon), file=sys.stderr)
+                continue
             if supertaxon:
                 print(hit.query_id, supertaxon)
                 if supertaxon == 2166:
