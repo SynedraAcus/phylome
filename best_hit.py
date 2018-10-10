@@ -3,6 +3,7 @@
 from argparse import ArgumentParser
 
 import pymysql
+import sys
 
 from phylome.blast_parser import parse_blast_file_to_hits, iterate_by_query
 from phylome.taxonomy import get_supertaxon_from_list
@@ -24,7 +25,7 @@ taxid_request = 'select * from acc2taxid where accession in ({});'
 
 # Opening handles
 red_handle = open(args.f + '.reds', mode='w')
-green_handle = open(args.f + 'greens', mode='w')
+green_handle = open(args.f + '.greens', mode='w')
 none_handle = open(args.f + '.none', mode='w')
 best = {'red': [], 'green': [], 'none': []}
 for hit_list in iterate_by_query(parse_blast_file_to_hits(filename=args.f)):
@@ -43,7 +44,7 @@ for hit_list in iterate_by_query(parse_blast_file_to_hits(filename=args.f)):
                                                   [2166, 33090],
                                                   cursor)
         except KeyError:
-            print('Unknown ID {}'.format(hit.hit_id))
+            print('Unknown ID {}'.format(hit.hit_id), file=sys.stderr)
         if supertaxon:
             print(hit.query_id, supertaxon)
             if supertaxon == 2166:
@@ -55,13 +56,17 @@ for hit_list in iterate_by_query(parse_blast_file_to_hits(filename=args.f)):
                 print(hit.query_id, file=green_handle)
                 green_handle.flush()
         else:
+            best['none'].append(hit.query_id)
             print(hit.query_id, file=none_handle)
             none_handle.flush()
     else:
         for hit in l:
-            supertaxon = get_supertaxon_from_list(acc2taxid[hit.hit_id.split('.')[0]],
-                                                  [2166, 33090],
-                                                  cursor)
+            try:
+                supertaxon = get_supertaxon_from_list(acc2taxid[hit.hit_id.split('.')[0]],
+                                                      [2166, 33090],
+                                                      cursor)
+            except KeyError:
+                print('Unknown ID {}'.format(hit.hit_id), file=sys.stderr)
             if supertaxon:
                 print(hit.query_id, supertaxon)
                 if supertaxon == 2166:
@@ -74,6 +79,7 @@ for hit_list in iterate_by_query(parse_blast_file_to_hits(filename=args.f)):
                     green_handle.flush()
                 break
             else:
+                best['none'].append(hit.query_id)
                 print(hit.query_id, file=none_handle)
                 none_handle.flush()
 
