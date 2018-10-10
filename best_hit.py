@@ -20,6 +20,10 @@ cnx = pymysql.connect(user=args.u, host=args.o, password=args.p,
 cursor = cnx.cursor()
 taxid_request = 'select * from acc2taxid where accession in ({});'
 
+# Opening handles
+red_handle = open(args.f + '.reds', mode='w')
+green_handle = open(args.f + 'greens', mode='w')
+none_handle = open(args.f + '.none', mode='w')
 for hit_list in iterate_by_query(parse_blast_file_to_hits(filename=args.f)):
     best = {'red': [], 'green': [], 'none': []}
     # Loading the relevant piece of acc2taxid
@@ -37,21 +41,17 @@ for hit_list in iterate_by_query(parse_blast_file_to_hits(filename=args.f)):
         if supertaxon:
             print(hit.hit_id, supertaxon)
             if supertaxon == 2166:
+                print(hit.hit_id, file=red_handle)
                 best['red'].append(hit.hit_id)
             elif supertaxon == 33090:
                 best['green'].append(hit.hit_id)
+                print(hit.hit_id, file=green_handle)
             break
         else:
-            best['none'].append(hit.hit_id)
+            print(hit.hit_id, file=none_handle)
+
 print('Red\t{}\nGreen\t{}\nNone\t{}'.format(len(best['red']),
                                             len(best['green']),
                                             len(best['none'])))
-with open(args.f+'.reds', mode='w') as fh:
-    for x in best['red']:
-        print(x, file=fh)
-with open(args.f+'.greens', mode='w') as fh:
-    for x in best['green']:
-        print(x, file=fh)
-with open(args.f+'.none', mode='w') as fh:
-    for x in best['none']:
-        print(x, file=fh)
+for handle in (red_handle, green_handle, none_handle):
+    handle.close()
