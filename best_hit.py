@@ -38,9 +38,12 @@ for hit_list in iterate_by_query(parse_blast_file_to_hits(filename=args.f)):
     l = sorted(hit_list, key=lambda x: min([hsp.evalue for hsp in x.hsps]))
     if args.best:
         hit = l[0]
-        supertaxon = get_supertaxon_from_list(acc2taxid[hit.hit_id.split('.')[0]],
-                                              [2166, 33090],
-                                              cursor)
+        try:
+            supertaxon = get_supertaxon_from_list(acc2taxid[hit.hit_id.split('.')[0]],
+                                                  [2166, 33090],
+                                                  cursor)
+        except KeyError:
+            print('Unknown ID {}'.format(hit.hit_id))
         if supertaxon:
             print(hit.query_id, supertaxon)
             if supertaxon == 2166:
