@@ -63,13 +63,13 @@ for hit_list in iterate_by_query(parse_blast_file_to_hits(filename=args.f)):
             print('Unknown sequence ID {}'.format(hit.hit_id))
             continue
         try:
-            supertaxon = cached_supertaxon(taxon, [2166, 33090], cursor)
+            supertaxon = cached_supertaxon(taxon, [2763, 33090], cursor)
         except ValueError:
             print('Unknown ID {}'.format(taxon), file=sys.stderr)
             continue
         if supertaxon:
             print(hit.query_id, supertaxon)
-            if supertaxon == 2166:
+            if supertaxon == 2763:
                 print(hit.query_id, file=red_handle)
                 red_handle.flush()
                 best['red'].append(hit.query_id)
@@ -89,13 +89,13 @@ for hit_list in iterate_by_query(parse_blast_file_to_hits(filename=args.f)):
                 print('Unknown sequence ID {}'.format(hit.hit_id))
                 continue
             try:
-                supertaxon = cached_supertaxon(taxon, [2166, 33090], cursor)
+                supertaxon = cached_supertaxon(taxon, [2763, 33090], cursor)
             except ValueError:
                 print('Unknown ID {}'.format(taxon), file=sys.stderr)
                 continue
             if supertaxon:
                 print(hit.query_id, supertaxon)
-                if supertaxon == 2166:
+                if supertaxon == 2763:
                     print(hit.query_id, file=red_handle)
                     red_handle.flush()
                     best['red'].append(hit.query_id)
